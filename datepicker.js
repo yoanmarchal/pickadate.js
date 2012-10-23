@@ -1,5 +1,5 @@
 /*!
-    datepicker.js v1.0
+    datepicker.js v0.3
     By Amsul (http://amsul.ca)
 
     Updated: 23 October, 2012
@@ -18,7 +18,7 @@
 
 
 
-;(function( $, window, document ) {
+;(function( $, window, document, undefined ) {
 
     'use strict';
 
@@ -43,8 +43,23 @@
             /**
              *  Helper functions
              */
+
+            // Check if a value is an array
             isArray = Array.isArray || function( value ) {
                 return {}.toString.call( value ) === '[object Array]'
+            },
+
+            // Wrap an item
+            wrapItemWithTagAndClass = function( wrapper, item, klass ) {
+
+                // If the item is an array, do a join
+                if ( isArray( item ) ) item = item.join( '' )
+
+                // Check for a class
+                klass = ( klass ) ? ' class="' + klass + '"' : ''
+
+                // Return the wrapped item
+                return '<' + wrapper + klass + '>' + item + '</' + wrapper + '>'
             }
 
 
@@ -61,6 +76,12 @@
 
 
             class_box_calendar: 'datepicker--holder__calendar',
+
+            class_week: 'datepicker--week',
+
+            class_day_infocus: 'datepicker--day__infocus',
+            class_day_outfocus: 'datepicker--day__outfocus',
+
             class_box_months: 'datepicker--holder__months',
             class_box_years: 'datepicker--holder__years',
             class_box_weekdays: 'datepicker--holder__weekdays'
@@ -173,10 +194,7 @@
 
                             // Get the column index for the
                             // day if month starts on 0
-                            //
-                            // * we subtract 1 to compensate
-                            //   for the lack of 0index in theDate
-                            tempColumnIndex = ( theDate % DAYS_IN_WEEK ) - 1
+                            tempColumnIndex = theDate % DAYS_IN_WEEK
 
 
                         // Compare the day index if the
@@ -192,14 +210,6 @@
                             // Otherwise shift by the difference
                             // between the week length and day index
                             DAYS_IN_WEEK - tempColumnIndex
-                    })(),
-
-                    // Count the days to fill the end of the month
-                    countFillby = (function() {
-
-                        // Subtract how many days we have so far
-                        // from the number of days in the calendar
-                        return DAYS_IN_CALENDAR - ( countShiftby + countMonthDays )
                     })()
 
 
@@ -217,10 +227,28 @@
                     // Get the date of the month
                     date: theDate,
 
-                    // Convert the date to a calendary array
-                    toCalendarArray: function() {
+                    // Create a calendar head
+                    createCalendarHead: function() {
 
                         var
+                            wrapTableHeader = function( item, index ) {
+                                return wrapItemWithTagAndClass( 'th', item )
+                            }
+
+                        // Go through each day of the week
+                        // and return a wrapped the header
+                        // and then do a join.
+                        // Take the result and apply another
+                        // wrapper to group the cells
+                        return wrapItemWithTagAndClass( 'thead', Picker.settings.days_short.map( wrapTableHeader ) )
+                    },
+
+                    // Create a calendar body
+                    createCalendarBody: function() {
+
+                        var
+                            pseudoIndex, calendarDate, klass,
+
                             dateObject = this,
 
                             // Collection of calendar dates
@@ -230,36 +258,73 @@
                             calendarDatesFormatted = []
 
 
-                        // For every unit to shift by
-                        for ( var i = countShiftby; i > 0; i -= 1 ) {
+                        // Go through all the days in the calendar
+                        // and map a calendar date
+                        for ( var index = 0; index < DAYS_IN_CALENDAR; index += 1 ) {
 
-                            // Create a new date with a negative
-                            // index for the date, and then
-                            // pass the date to the calendar array
-                            calendarDates.push( new Date( theYear, theMonth, -i ).getDate() )
+
+                            // Get the distance between the index
+                            // and the count to shift by.
+                            // This will serve as the separator
+                            // between the previous, current,
+                            // and next months.
+                            pseudoIndex = index - countShiftby
+
+
+                            // If the pseudoIndex is negative or zero,
+                            // we need the dates from the previous month
+                            if ( pseudoIndex <= 0 ) {
+
+                                // Create a new date with the negative pseudoIndex
+                                calendarDate = new Date( theYear, theMonth, pseudoIndex ).getDate()
+
+                                // Set the class as out of focus
+                                klass = Picker.settings.class_day_outfocus
+                            }
+
+                            // If the pseudoIndex is less than or equal
+                            // to the number of days in the month,
+                            // we need all the dates this month
+                            else if ( pseudoIndex <= countMonthDays ) {
+
+                                // The date is the pseudoIndex
+                                calendarDate = pseudoIndex
+
+                                // Set the class as in focus
+                                klass = Picker.settings.class_day_infocus
+                            }
+
+                            // Otherwise we need dates from next month
+                            else {
+
+                                // Subtract the days in the current month
+                                // from the pseudoIndex so we get a date reset
+                                calendarDate = pseudoIndex - countMonthDays
+
+                                // Set the class as out of focus
+                                klass = Picker.settings.class_day_outfocus
+                            }
+
+
+                            // Pass the item to the calendar array
+                            calendarDates.push( wrapItemWithTagAndClass( 'td', calendarDate, klass ) )
                         }
 
 
-                        // For every day in the month
-                        for ( var i = 1; i <= countMonthDays; i += 1 ) {
-                            calendarDates.push( i )
-                        }
 
-
-                        // For every day to fill in the week
-                        for ( var i = 1; i <= countFillby; i += 1 ) {
-                            calendarDates.push( i )
-                        }
-
-
-                        // Go through all the weeks in the calendar
-                        // and splice the calendar days into sub arrays
+                        // Format the calendar dates by
+                        // splicing the array to group into weeks
                         for ( var i = 0; i < WEEKS_IN_CALENDAR; i += 1 ) {
-                            calendarDatesFormatted[ i ] = calendarDates.splice( 0, DAYS_IN_WEEK )
+
+                            // Splice, join, and then wrap each day
+                            calendarDatesFormatted[ i ] = wrapItemWithTagAndClass( 'tr', calendarDates.splice( 0, DAYS_IN_WEEK ) )
                         }
 
-                        return calendarDatesFormatted
-                    } //toCalendarArray
+
+                        // Join the dates and wrap the calendar body
+                        return wrapItemWithTagAndClass( 'tbody', calendarDatesFormatted )
+                    } //createCalendarBody
+
                 }
             }, //getDate
 
@@ -269,50 +334,18 @@
              */
             createCalendar: function() {
 
-                var calendar = {},
-
-                    // Convert the picker date to a calendar array
-                    calendarArray = Picker.date.toCalendarArray(),
-
-
-                    // Map an array,
-                    // wrap within a tag,
-                    // and then join into a string
-                    mapWrapJoin = function( array, wrapper ) {
-
-                        var doWrapper = function( item, index ) {
-
-                            var itemToWrap = item
-
-                            // If it's an array, map it again
-                            // but this time as a cell
-                            // and set as item to wrap
-                            if ( isArray( item ) ) {
-                                itemToWrap = mapWrapJoin( item, 'td' )
-                            }
-
-                            // Then just return the wrapped item
-                            return '<' + wrapper + '>' + itemToWrap + '</' + wrapper + '>'
-                        }
-
-
-                        // Map through each item in the array
-                        // and return the wrapped and joined array
-                        return array.map( doWrapper ).join( '\n' )
-                    }
-
+                var calendar = {}
 
                 // Create the calendar header
-                calendar.head = '<thead>' + mapWrapJoin( Picker.settings.days_short, 'th' ) + '</thead>'
+                calendar.head = Picker.date.createCalendarHead()
 
 
-                // Map through the calendar array
-                // and wrap the rows, then join and return
-                calendar.body = '<tbody>' + mapWrapJoin( calendarArray, 'tr' ) + '</tbody>'
+                // Create the calendar body
+                calendar.body = Picker.date.createCalendarBody()
 
 
                 // Construct the calendar table
-                calendar.table = '<table class="' + Picker.settings.class_box_calendar + '">' + calendar.head + calendar.body + '</table>'
+                calendar.table = wrapItemWithTagAndClass( 'table', calendar.head + calendar.body, Picker.settings.class_box_calendar )
 
 
                 // Place the calendar in the dom
