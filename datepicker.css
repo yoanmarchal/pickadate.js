@@ -1,9 +1,32 @@
 
 
-.datepicker--holder__calendar {
+.datepicker--calendar {
     text-align: center;
     border-collapse: collapse;
     border-spacing: 0;
+    table-layout: fixed;
+}
+
+.datepicker--weekday {
+    width: 14.285714286%; /* 100/7 */
 }
 
 
+.datepicker--day__infocus:hover,
+.datepicker--day__outfocus:hover {
+    cursor: pointer;
+    background: #eee;
+}
+
+
+.datepicker--day__outfocus {
+    color: #ccc;
+}
+
+.datepicker--day__today {
+    color: red;
+}
+
+.datepicker--day__selected {
+    background: orange !important;
+}
