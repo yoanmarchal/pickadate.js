@@ -1,8 +1,8 @@
 /*!
-    datepicker.js v0.4.2
+    datepicker.js v0.4.3
     By Amsul (http://amsul.ca)
 
-    Updated: 25 October, 2012
+    Updated: 07 November, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -39,6 +39,12 @@
             WEEKS_IN_CALENDAR = 6,
             DAYS_IN_CALENDAR = WEEKS_IN_CALENDAR * DAYS_IN_WEEK,
 
+            MONTHS = [
+                'January', 'February', 'March', 'April',
+                'May', 'June', 'July', 'August',
+                'September', 'October', 'November', 'December'
+            ],
+
 
             /**
              *  Helper functions
@@ -62,7 +68,7 @@
                 data = ( data && data.name ) ? ' data-' + data.name + '="' + data.value + '"' : ''
 
                 // Return the wrapped item
-                return '<' + wrapper + klass + data + '>' + item + '</' + wrapper + '>'
+                return '<' + wrapper + data + klass + '>' + item + '</' + wrapper + '>'
             }
 
 
@@ -144,11 +150,8 @@
                 // immediately render it
                 P.calendar = P.createCalendarObject().render()
 
-
-                // console.log( P )
-
                 return P
-            },
+            }, //create
 
 
 
@@ -158,6 +161,8 @@
             createCalendarObject: function() {
 
                 var
+                    // Get today's date once
+                    today = P.getDateToday(),
 
                     // Create the calendar head
                     calendarHead = (function() {
@@ -173,12 +178,7 @@
                         // Take the result and apply another
                         // wrapper to group the cells
                         return wrapItemWithTagAndClassAndBinding( 'thead', P.settings.days_short.map( wrapTableHeader ) )
-                    })(), //calendarHead
-
-
-                    // Collection of calendar components
-                    calendarComponents = [ calendarHead ]
-
+                    })() //calendarHead
 
 
                 return {
@@ -189,28 +189,43 @@
                     render: function() {
 
                         var
+                            calendarString = '',
+
                             // Create a reference to this calendar object
-                            calendarObject = this
+                            calendarObject = this,
+
+                            // Create a new calendar body
+                            calendarBody = calendarObject.createBody()
 
 
-                        // Create a new calendar body
-                        // and pass it into the components collection
-                        calendarComponents.push( calendarObject.createBody() )
+                        // Create the calendar month tag
+                        calendarString += wrapItemWithTagAndClassAndBinding( 'div', P.getMonthString(), 'asdfasdfsdf' )
+
+                        // Create the calendar table
+                        calendarString += wrapItemWithTagAndClassAndBinding( 'table', [ calendarHead, calendarBody ], P.settings.class_calendar )
 
 
-                        // Create the jQuery calendar
-                        // while binding delegated events
-                        P.$calendar = $( wrapItemWithTagAndClassAndBinding( 'table', calendarComponents, P.settings.class_calendar ) ).on({
-                            click: P.onClickCalendar
-                        })
+
+                        // If a calendar box already exists
+                        if ( P.$calendarBox ) {
+
+                            // Just replace it with the calendar string
+                            P.$calendarBox.html( calendarString )
+                        }
 
 
-                        // Store the calendar body
-                        P.$calendarBody = P.$calendar.find( '.' + P.settings.class_calendar_body )
+                        // Otherwise if there's no calendar box
+                        else {
 
+                            // Create the jQuery calendar box
+                            // while binding delegated events
+                            P.$calendarBox = $( wrapItemWithTagAndClassAndBinding( 'div', calendarString ) ).on({
+                                click: P.onClickCalendar
+                            })
 
-                        // Insert the calendar after the input element
-                        P.$element.after( P.$calendar )
+                            // Insert the calendar after the input element
+                            P.$element.after( P.$calendarBox )
+                        }
 
 
                         return calendarObject
@@ -243,9 +258,8 @@
                             dataBinding,
 
                             // Boolean to check if looped day is
-                            // of the month in focus or not.
-                            // Initially set to false
-                            isMonthFocused = false,
+                            // of the month in focus or not
+                            isMonthFocused,
 
                             // Get the focused date
                             dateFocused = P.getDateFocused(),
@@ -260,7 +274,7 @@
                             countShiftby = P.getCountShiftDays( dateFocused.DATE, dateFocused.DAY ),
 
                             // Collection of the dates visible on the calendar
-                            // * this gets discarded at the end
+                            // * This gets discarded at the end
                             calendarDates = [],
 
                             // Collection of weeks visible on calendar
@@ -271,6 +285,9 @@
                         // Go through all the days in the calendar
                         // and map a calendar date
                         for ( var index = 0; index < DAYS_IN_CALENDAR; index += 1 ) {
+
+                            // Set month focused to false
+                            isMonthFocused = false
 
                             // Get the distance between the index
                             // and the count to shift by.
@@ -298,7 +315,7 @@
                                     YEAR: loopDate.getFullYear(),
                                     MONTH: loopDate.getMonth(),
                                     DATE: loopDate.getDate(),
-                                    DAY: index % DAYS_IN_WEEK
+                                    DAY: dayOfWeekIndex
                                 }
                             }
 
@@ -309,7 +326,7 @@
                             // all the dates this month
                             else {
 
-                                // Set boolean to true
+                                // Set month focused to true
                                 isMonthFocused = true
 
                                 // Create a loop date object
@@ -344,19 +361,14 @@
 
 
                                 // If it's today, add the class
-                                if ( loopDate.DATE === dateFocused.DATE ) {
+                                if ( loopDate.DATE === today.DATE && loopDate.MONTH === today.MONTH ) {
                                     tempKlass.push( P.settings.class_day_today )
                                 }
 
 
-                                // If it's the selected date
-                                if ( loopDate.DATE === dateSelected.DATE ) {
-
-                                    // Add the "selected" class
+                                // If it's the selected date, add the class
+                                if ( loopDate.DATE === dateSelected.DATE && loopDate.MONTH === dateSelected.MONTH ) {
                                     tempKlass.push( P.settings.class_day_selected )
-
-                                    // Store this as the selected date
-                                    P.DATE_SELECTED = loopDate
                                 }
 
 
@@ -382,8 +394,8 @@
                             calendarDates.push( wrapItemWithTagAndClassAndBinding( 'td', loopDate.DATE, klass, dataBinding ) )
 
 
-                            // If it's the end of a week
-                            // * add 1 for 0index compensation
+                            // Check if it's the end of a week.
+                            // * We add 1 for 0index compensation
                             if ( dayOfWeekIndex + 1 === DAYS_IN_WEEK ) {
 
                                 // Wrap the week and pass it into the calendar weeks
@@ -402,6 +414,26 @@
             }, //createCalendarObject
 
 
+            /**
+             *  Get today's date
+             */
+            getDateToday: function() {
+                return P.DATE_TODAY || (function() {
+
+                    // Create a new date for today
+                    var dateToday = new Date()
+
+                    // Create and return the calendar date object
+                    return P.DATE_TODAY = {
+                        YEAR: dateToday.getFullYear(),
+                        MONTH: dateToday.getMonth(),
+                        DATE: dateToday.getDate(),
+                        DAY: dateToday.getDay()
+                    }
+                })()
+            },
+
+
 
             /**
              *  Get the date that determines
@@ -409,17 +441,23 @@
              */
             getDateFocused: function() {
 
-                var
-                    dateFocused = new Date(),
+                // If there's a date set to focus, return it
+                // otherwise figure out the date
+                return P.DATE_FOCUSED || (function() {
 
-                    calendarDateObject = {
-                        YEAR: dateFocused.getFullYear(),
-                        MONTH: dateFocused.getMonth(),
-                        DATE: dateFocused.getDate(),
-                        DAY: dateFocused.getDay()
-                    }
+                        // Set the date to today
+                        var dateFocused = new Date()
 
-                return calendarDateObject
+                        // Create the calendar date object
+                        P.DATE_FOCUSED = {
+                            YEAR: dateFocused.getFullYear(),
+                            MONTH: dateFocused.getMonth(),
+                            DATE: dateFocused.getDate(),
+                            DAY: dateFocused.getDay()
+                        }
+
+                        return P.DATE_FOCUSED
+                })()
             }, //getDateFocused
 
 
@@ -454,7 +492,6 @@
                     return P.DATE_SELECTED
                 })()
             }, //getDateSelected
-
 
 
             /**
@@ -499,28 +536,30 @@
              *  days to shift the month by,
              *  given the date and day of week
              */
-            getCountShiftDays: function( date, day ) {
+            getCountShiftDays: function( date, dayIndex ) {
 
                 var
-
                     // Get the column index for the
                     // day if month starts on 0
-                    tempColumnIndex = date % DAYS_IN_WEEK
+                    tempColumnIndex = date % DAYS_IN_WEEK,
+
+                    // Get the absolute difference
+                    absoluteDifference = Math.abs( dayIndex - tempColumnIndex )
 
 
                 // Compare the day index if the
                 // month starts on the first day
                 // with the day index
                 // the date actually falls on
-                return ( day >= tempColumnIndex ) ?
+                return ( dayIndex >= tempColumnIndex ) ?
 
                     // If the actual position is greater
                     // shift by the difference in the two
-                    day - tempColumnIndex :
+                    absoluteDifference :
 
                     // Otherwise shift by the difference
-                    // between the week length and day index
-                    DAYS_IN_WEEK - tempColumnIndex
+                    // between the week length and absolute difference
+                    DAYS_IN_WEEK - absoluteDifference
             }, //getCountShiftDays
 
 
@@ -529,23 +568,36 @@
              *  of the selected day
              */
             getSelectedDay: function() {
-                return P.$calendarBody.find( '.' + P.settings.class_day_selected )
+                return P.$calendarBox.find( '.' + P.settings.class_day_selected )
             }, //getSelectedDay
+
+
+            /**
+             *  Get the focused month as a string
+             */
+            getMonthString: function() {
+                return MONTHS[ P.DATE_FOCUSED.MONTH ]
+            }, //getMonthString
 
 
             /**
              *  Set a day as selected by receiving
              *  the day jQuery object
              */
-            setStateSelected: function( $dayTargeted ) {
+            setCalendarDate: function( $dayTargeted ) {
 
                 var
-                    // Get the previously selected date
-                    dateSelected = P.getDateSelected(),
+                    // Get the selected day
+                    $daySelected = P.getSelectedDay(),
 
-                    // Get the date from the targeted element
-                    // and split into an array.
-                    // Set as active and add the active state to the element
+                    // Get the selected date
+                    dateSelected = P.DATE_SELECTED,
+
+                    // Get the focused date
+                    dateFocused = P.DATE_FOCUSED,
+
+                    // Create the targetted date array
+                    // from the clicked date
                     dateTargetedArray = $dayTargeted.data( 'date' ).split( '/' ),
 
                     // Create the date target object while
@@ -558,40 +610,39 @@
                     }
 
 
-                // Check if there has been a change in date
+                // Check if there has been no change in date
+                // just return it
                 if ( dateTargeted.YEAR === dateSelected.YEAR && dateTargeted.MONTH === dateSelected.MONTH && dateTargeted.DATE === dateSelected.DATE ) {
                     return P
                 }
 
 
-                // Set the selected date as unselected
-                P.setStateUnselected( P.getSelectedDay() )
-
-                // Add the "selected" state to the targeted date
-                $dayTargeted.addClass( P.settings.class_day_selected )
-
                 // Set the target as the newly selected date
                 P.DATE_SELECTED = dateTargeted
 
 
+                // If it's the same month
+                if ( dateTargeted.MONTH === dateFocused.MONTH ) {
+
+                    // Remove the "selected" state from the selected date
+                    $daySelected.removeClass( P.settings.class_day_selected )
+
+                    // Add the "selected" state to the targeted date
+                    $dayTargeted.addClass( P.settings.class_day_selected )
+                }
+
+                // Otherwise if there's been a change in month
+                else {
+
+                    // Set the target as the newly focused date
+                    P.DATE_FOCUSED = dateTargeted
+
+                    // Render a new calendar
+                    P.calendar.render()
+                }
+
                 return P
-            }, //setStateSelected
-
-
-            /**
-             *  Set a day as unselected by receiving
-             *  the day jQuery object
-             */
-            setStateUnselected: function( $daySelected ) {
-
-                // Remove the active state from the selected day
-                $daySelected.removeClass( P.settings.class_day_selected )
-
-                // Set the selected date to null
-                P.DATE_SELECTED = null
-
-                return P
-            }, //setStateUnselected
+            }, //setCalendarDate
 
 
 
@@ -607,9 +658,10 @@
 
                 // If there's a date provided
                 if ( $target.data( 'date' ) ) {
-                    P.setStateSelected( $target )
-                }
 
+                    // Set the selected day
+                    P.setCalendarDate( $target )
+                }
             } //onClickCalendar
 
 
