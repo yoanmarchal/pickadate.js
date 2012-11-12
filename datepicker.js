@@ -1,8 +1,8 @@
 /*!
-    datepicker.js v0.4.5
+    datepicker.js v0.5.0
     By Amsul (http://amsul.ca)
 
-    Updated: 09 November, 2012
+    Updated: 12 November, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
@@ -108,7 +108,7 @@
                  */
                 create: function( $element, options ) {
 
-                    // Store the element while
+                    // Store the element
                     P.$element = $element
 
                     // Convert into a regular text input
@@ -130,6 +130,19 @@
                 createCalendarObject: function() {
 
                     var
+
+                        /**
+                         *  Get the nav for next and previous
+                         *  month as a string
+                         */
+                        createMonthNav = function() {
+
+                            var
+                                prev = create( 'div', P.settings.month_prev, P.settings.class_month_prev, { name: 'nav', value: 'prev' } ),
+                                next = create( 'div', P.settings.month_next, P.settings.class_month_next, { name: 'nav', value: 'next' } )
+
+                            return prev + next
+                        }, //createMonthNav
 
                         /**
                          *  Create the calendar table head
@@ -344,13 +357,13 @@
                             return [
 
                                 // The prev/next month tags
-                                create( 'div', P.getStringMonthNav(), P.settings.class_month_nav ),
+                                create( 'div', createMonthNav(), P.settings.class_month_nav ),
 
                                 // The calendar month tag
-                                create( 'div', P.getStringMonth(), P.settings.class_month ),
+                                create( 'div', P.getFocusedMonth(), P.settings.class_month ),
 
                                 // The calendar year tag
-                                create( 'div', P.getStringYear(), P.settings.class_year )
+                                create( 'div', P.getFocusedYear(), P.settings.class_year )
                             ]
                         } //getDefaultCalendarItems
 
@@ -394,12 +407,12 @@
 
 
                                 // Event to set the calendar as active
-                                onCalendarActive = function( event ) {
+                                onCalendarActive = function() {
                                     P.calendar.setCalendarActive( true )
                                 },
 
                                 // Event to set the calendar as inactive
-                                onCalendarInactive = function( event ) {
+                                onCalendarInactive = function() {
                                     P.calendar.setCalendarActive()
                                 }
 
@@ -429,9 +442,8 @@
                             // Insert the calendar after the element
                             // while binding the events
                             P.$element.on({
-                                focusin: function( event ) {
-                                    P.calendar.open()
-                                },
+                                keypress: function() { return false },
+                                focusin: function() { P.calendar.open() },
                                 mouseenter: onCalendarActive,
                                 mouseleave: onCalendarInactive
                             }).after( P.$calendarHolder )
@@ -460,7 +472,7 @@
                                  *  Check if the click position asks
                                  *  for the calendar to be closed
                                  */
-                                onClickWindow = function( event ) {
+                                onClickWindow = function() {
 
                                     // If the calendar is opened
                                     if ( calendarObject.isOpen && !calendarObject.isActive ) {
@@ -532,6 +544,9 @@
                         setCalendarDate: function( $dayTargeted ) {
 
                             var
+                                // Create a reference to this calendar object
+                                calendarObject = this,
+
                                 // Get the selected day
                                 $daySelected = P.findSelectedDay(),
 
@@ -587,15 +602,45 @@
                             // Otherwise if there's been a change in month
                             else {
 
-                                // Set the target as the newly focused date
+                                // Set the target as the newly focused month
                                 P.MONTH_FOCUSED = dateTargeted || P.MONTH_FOCUSED
 
                                 // Render a new calendar
                                 P.calendar.render()
                             }
 
-                            return P
-                        } //setCalendarDate
+
+                            // If a day was targetted
+                            if ( $dayTargeted ) {
+
+                                // Set the element value
+                                P.$element[ 0 ].value = P.DATE_SELECTED.YEAR + ' ' + P.getSelectedMonth() + ' ' + P.DATE_SELECTED.DATE
+
+                                // Close the calendar
+                                calendarObject.close()
+                            }
+
+                            return calendarObject
+                        }, //setCalendarDate
+
+
+                        /**
+                         *  Change the month visible
+                         *  on the calendar
+                         */
+                        changeMonth: function( direction ) {
+
+                            var
+                                // Add or substract a month
+                                // based on the direction
+                                monthAddOrSubtract = ( direction === 'prev' ) ? -1 : 1
+
+                            // Set the month to show in focus
+                            P.setMonthFocused([ P.MONTH_FOCUSED.YEAR, P.MONTH_FOCUSED.MONTH + monthAddOrSubtract, P.MONTH_FOCUSED.DATE ])
+
+                            // Set the selected day
+                            P.calendar.setCalendarDate()
+                        } //changeMonth
 
                     } //endreturn
                 }, //createCalendarObject
@@ -783,35 +828,44 @@
                 }, //getCountShiftDays
 
 
-
                 /**
-                 *  Get the nav for next and previous
-                 *  month as a string
+                 *  Get the focused month
                  */
-                getStringMonthNav: function() {
-
-                    var
-                        prev = create( 'div', P.settings.month_prev, P.settings.class_month_prev, { name: 'nav', value: 'prev' } ),
-                        next = create( 'div', P.settings.month_next, P.settings.class_month_next, { name: 'nav', value: 'next' } )
-
-                    return prev + next
-                }, //getStringMonthNav
-
-
-                /**
-                 *  Get the focused month as a string
-                 */
-                getStringMonth: function() {
+                getFocusedMonth: function() {
                     return P.settings.months_full[ P.MONTH_FOCUSED.MONTH ]
-                }, //getStringMonth
+                }, //getFocusedMonth
 
 
                 /**
                  *  Get the focused year
                  */
-                getStringYear: function() {
+                getFocusedYear: function() {
                     return P.MONTH_FOCUSED.YEAR
-                }, //getStringYear
+                }, //getFocusedYear
+
+
+                /**
+                 *  Get the selected date
+                 */
+                getSelectedDate: function() {
+                    return P.DATE_SELECTED.DATE
+                }, //getSelectedDate
+
+
+                /**
+                 *  Get the selected month as a string
+                 */
+                getSelectedMonth: function() {
+                    return P.settings.months_full[ P.DATE_SELECTED.MONTH ]
+                }, //getSelectedMonth
+
+
+                /**
+                 *  Get the selected month as a string
+                 */
+                getSelectedYear: function() {
+                    return P.DATE_SELECTED.YEAR
+                }, //getSelectedYear
 
 
 
@@ -832,10 +886,11 @@
                  */
                 onClickCalendar: function( event ) {
 
-                    // Get the jQuery target
                     var
-                        MONTH_DIRECTION = 1,
+                        // Get the jQuery target
                         $target = $( event.target || event.srcTarget ),
+
+                        // Get the target data
                         targetData = $target.data()
 
                     // If there's a date provided
@@ -848,22 +903,15 @@
                     // If there's a navigator provided
                     else if ( targetData.nav ) {
 
-                        // Check the direction
-                        if ( targetData.nav === 'prev' ) {
-                            MONTH_DIRECTION = -1
-                        }
-
-                        // Set the month to show in focus
-                        P.setMonthFocused([ P.MONTH_FOCUSED.YEAR, P.MONTH_FOCUSED.MONTH + MONTH_DIRECTION, P.MONTH_FOCUSED.DATE ])
-
-                        // Set the selected day
-                        P.calendar.setCalendarDate()
+                        // Change the month according to direction
+                        P.calendar.changeMonth( targetData.nav )
                     }
 
                     // If it's something else
                     else {
                         console.log( 'something else', targetData )
                     }
+
                 } //onClickCalendar
 
 
