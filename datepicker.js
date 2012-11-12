@@ -31,6 +31,8 @@
         WEEKS_IN_CALENDAR = 6,
         DAYS_IN_CALENDAR = WEEKS_IN_CALENDAR * DAYS_IN_WEEK,
 
+        $window = $( window ),
+
 
         /**
          *  Helper functions
@@ -41,8 +43,8 @@
             return {}.toString.call( value ) === '[object Array]'
         },
 
-        // Wrap an item
-        wrapItem = function( wrapper, item, klass, data ) {
+        // Create a dom node string
+        create = function( wrapper, item, klass, data ) {
 
             // If the item is an array, do a join
             item = ( isArray( item ) ) ? item.join( '' ) : item
@@ -82,9 +84,6 @@
                     // Merge the settings
                     P.settings = $.extend( {}, DatePicker.defaults, options )
 
-                    // Store the element
-                    P.$element = $element
-
                     // Create and return the picker
                     return new P.create( $element, options )
                 }
@@ -108,6 +107,9 @@
                  *  Create the picker
                  */
                 create: function( $element, options ) {
+
+                    // Store the element while
+                    P.$element = $element
 
                     // Convert into a regular text input
                     // to remove user-agent stylings
@@ -137,7 +139,7 @@
 
                             var
                                 wrappedTableHead = function( weekday ) {
-                                    return wrapItem( 'th', weekday, P.settings.class_weekdays )
+                                    return create( 'th', weekday, P.settings.class_weekdays )
                                 }
 
                             // Go through each day of the week
@@ -145,9 +147,8 @@
                             // and then do a join.
                             // Take the result and apply another
                             // wrapper to group the cells
-                            return wrapItem( 'thead', P.settings.days_short.map( wrappedTableHead ) )
+                            return create( 'thead', P.settings.days_short.map( wrappedTableHead ) )
                         })(),
-
 
 
                         /**
@@ -275,7 +276,7 @@
                                 klass = (function() {
 
                                     // Create a collection for the classes
-                                    var klassCollection = []
+                                    var klassCollection = [ P.settings.class_calendar_date ]
 
 
                                     // Set the class as in or out of focus
@@ -314,7 +315,7 @@
 
 
                                 // Pass the item to the calendar array
-                                calendarDates.push( wrapItem( 'td', loopDate.DATE, klass, dataBinding ) )
+                                calendarDates.push( create( 'td', loopDate.DATE, klass, dataBinding ) )
 
 
                                 // Check if it's the end of a week.
@@ -322,7 +323,7 @@
                                 if ( dayOfWeekIndex + 1 === DAYS_IN_WEEK ) {
 
                                     // Wrap the week and pass it into the calendar weeks
-                                    calendarWeeks.push( wrapItem( 'tr', calendarDates.splice( 0, DAYS_IN_WEEK ) ) )
+                                    calendarWeeks.push( create( 'tr', calendarDates.splice( 0, DAYS_IN_WEEK ) ) )
                                 }
 
                             } //endfor
@@ -330,12 +331,198 @@
 
 
                             // Join the dates and wrap the calendar body
-                            return wrapItem( 'tbody', calendarWeeks, P.settings.class_calendar_body )
-                        } //createTableBody
+                            return create( 'tbody', calendarWeeks, P.settings.class_calendar_body )
+                        }, //createTableBody
+
+
+                        /**
+                         *  Get the default collection
+                         *  of items in a calendar
+                         *  * Depends on at least one calendar body
+                         */
+                        getDefaultCalendarItems = function() {
+                            return [
+
+                                // The prev/next month tags
+                                create( 'div', P.getStringMonthNav(), P.settings.class_month_nav ),
+
+                                // The calendar month tag
+                                create( 'div', P.getStringMonth(), P.settings.class_month ),
+
+                                // The calendar year tag
+                                create( 'div', P.getStringYear(), P.settings.class_year )
+                            ]
+                        } //getDefaultCalendarItems
 
 
 
                     return {
+
+                        /**
+                         *  Render a complete calendar
+                         */
+                        render: function() {
+
+                            var
+                                // Create a reference to this calendar object
+                                calendarObject = this,
+
+                                // Create the collection of calendar items
+                                calendarItems = (function() {
+
+                                    var
+                                        // First create a new calendar table body
+                                        tableBody = createTableBody(),
+
+                                        // Then get the default calendar items
+                                        collection = getDefaultCalendarItems()
+
+                                    // Create the calendar table,
+                                    // and push it into the collection
+                                    collection.push( create( 'table', [ tableHead, tableBody ], P.settings.class_calendar ) )
+
+                                    // Return the collection
+                                    return collection
+                                })(),
+
+
+                                // Create a new calendar holder and box
+                                // with the items collection
+                                calendarHolderString = create( 'div', (function() {
+                                    return create( 'div', calendarItems, P.settings.class_calendar_box )
+                                })(), P.settings.class_picker_holder ),
+
+
+                                // Event to set the calendar as active
+                                onCalendarActive = function( event ) {
+                                    P.calendar.setCalendarActive( true )
+                                },
+
+                                // Event to set the calendar as inactive
+                                onCalendarInactive = function( event ) {
+                                    P.calendar.setCalendarActive()
+                                }
+
+
+
+                            // If a calendar holder already exists
+                            if ( P.$calendarHolder ) {
+
+                                // Just replace it with the calendar string
+                                P.$calendarHolder.html( calendarHolderString )
+
+                                // And then return
+                                return calendarObject
+                            }
+
+
+                            // Otherwise if there's no calendar box
+                            // create the jQuery calendar box
+                            // while binding delegated events
+                            P.$calendarHolder = $( calendarHolderString ).on({
+                                click: P.onClickCalendar,
+                                mouseenter: onCalendarActive,
+                                mouseleave: onCalendarInactive
+                            })
+
+
+                            // Insert the calendar after the element
+                            // while binding the events
+                            P.$element.on({
+                                focusin: function( event ) {
+                                    P.calendar.open()
+                                },
+                                mouseenter: onCalendarActive,
+                                mouseleave: onCalendarInactive
+                            }).after( P.$calendarHolder )
+
+
+                            // Create a random calendar id
+                            calendarObject.id = Math.floor( Math.random()*1e9 )
+
+
+                            // Return the calendarObject
+                            return calendarObject
+                        }, //render
+
+
+                        /**
+                         *  Open the calendar
+                         */
+                        open: function() {
+
+                            var
+                                // Create a reference to this calendar object
+                                calendarObject = this,
+
+
+                                /**
+                                 *  Check if the click position asks
+                                 *  for the calendar to be closed
+                                 */
+                                onClickWindow = function( event ) {
+
+                                    // If the calendar is opened
+                                    if ( calendarObject.isOpen && !calendarObject.isActive ) {
+
+                                        // Close the calendar
+                                        P.calendar.close()
+                                    }
+                                }
+
+
+                            // Set calendar as open
+                            calendarObject.isOpen = true
+
+                            // Add the "opened" class to the calendar holder
+                            P.$calendarHolder.addClass( P.settings.class_picker_open )
+
+
+                            // Bind the click event to the window
+                            $window.on( 'click.P' + calendarObject.id, onClickWindow )
+
+                            return calendarObject
+                        }, //open
+
+
+                        /**
+                         *  Close the calendar
+                         */
+                        close: function() {
+
+                            var
+                                // Create a reference to this calendar object
+                                calendarObject = this
+
+
+                            // Set calendar as closed
+                            calendarObject.isOpen = false
+
+                            // Remove the "opened" class from the calendar holder
+                            P.$calendarHolder.removeClass( P.settings.class_picker_open )
+
+                            // Unbind the click event from the window
+                            $window.off( 'click.P' + calendarObject.id )
+
+                            return calendarObject
+                        }, //close
+
+
+                        /**
+                         *  Set the calendar as active
+                         *  ie. hovered over by the user
+                         */
+                        setCalendarActive: function( trueOrFalse ) {
+
+                            var
+                                // Create a reference to this calendar object
+                                calendarObject = this
+
+                            // Set the calendar state
+                            calendarObject.isActive = trueOrFalse || false
+
+                            return calendarObject
+                        }, //setCalendarActive
 
 
                         /**
@@ -384,7 +571,7 @@
 
 
                             // Set the target as the newly selected date
-                            P.DATE_SELECTED = dateTargeted
+                            P.DATE_SELECTED = dateTargeted || P.DATE_SELECTED
 
 
                             // If it's the same month
@@ -408,64 +595,7 @@
                             }
 
                             return P
-                        }, //setCalendarDate
-
-                        /**
-                         *  Render a complete calendar
-                         */
-                        render: function() {
-
-                            var
-
-                                // Create a reference to this calendar object
-                                calendarObject = this,
-
-                                // Create a calendar item collection
-                                calendarItems = [],
-
-                                // Create the new calendar table body
-                                tableBody = createTableBody()
-
-
-
-                            // Create the prev/next month tags
-                            calendarItems.push( wrapItem( 'div', P.getStringMonthNav(), 'klass-brah' ) )
-
-                            // Create the calendar month tag
-                            calendarItems.push( wrapItem( 'div', P.getStringMonth(), P.settings.class_month ) )
-
-                            // Create the calendar year tag
-                            calendarItems.push( wrapItem( 'div', P.getStringYear(), P.settings.class_month ) )
-
-                            // Create the calendar table
-                            calendarItems.push( wrapItem( 'table', [ tableHead, tableBody ], P.settings.class_calendar ) )
-
-
-                            // If a calendar box already exists
-                            if ( P.$calendarBox ) {
-
-                                // Just replace it with the calendar string
-                                P.$calendarBox.html( calendarItems.join( '' ) )
-                            }
-
-
-                            // Otherwise if there's no calendar box
-                            else {
-
-                                // Create the jQuery calendar box
-                                // while binding delegated events
-                                P.$calendarBox = $( wrapItem( 'div', calendarItems, P.settings.class_calendar_box ) ).on({
-                                    click: P.onClickCalendar
-                                })
-
-                                // Insert the calendar after the input element
-                                P.$element.after( P.$calendarBox )
-                            }
-
-
-                            // Return the calendarObject
-                            return calendarObject
-                        } //render
+                        } //setCalendarDate
 
                     } //endreturn
                 }, //createCalendarObject
@@ -537,7 +667,7 @@
                         })( calendarDateArray[ 1 ] ),
 
                         date = calendarDateArray[ 2 ],
-                        day = calendarDateArray[ 3 ] || new Date( year, month, date ).getDay()
+                        day = new Date( year, month, date ).getDay()
 
                     // Set and return the month focused
                     return P.MONTH_FOCUSED = {
@@ -659,7 +789,12 @@
                  *  month as a string
                  */
                 getStringMonthNav: function() {
-                    return wrapItem( 'div', 'next', 'klassname', { name: 'nav', value: 'next' } ) + wrapItem( 'div', 'prev', 'klassname', { name: 'nav', value: 'prev' } )
+
+                    var
+                        prev = create( 'div', P.settings.month_prev, P.settings.class_month_prev, { name: 'nav', value: 'prev' } ),
+                        next = create( 'div', P.settings.month_next, P.settings.class_month_next, { name: 'nav', value: 'next' } )
+
+                    return prev + next
                 }, //getStringMonthNav
 
 
@@ -685,7 +820,7 @@
                  *  of the selected day
                  */
                 findSelectedDay: function() {
-                    return P.$calendarBox.find( '.' + P.settings.class_day_selected )
+                    return P.$calendarHolder.find( '.' + P.settings.class_day_selected )
                 }, //findSelectedDay
 
 
@@ -753,14 +888,24 @@
         days_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
         days_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 
+        month_prev: '&#9664;',
+        month_next: '&#9654;',
+
+        class_picker_open: 'datepicker--opened',
+        class_picker_holder: 'datepicker--holder',
+
         class_calendar_box: 'datepicker--calendar__box',
 
         class_calendar: 'datepicker--calendar',
         class_calendar_body: 'datepicker--calendar__body',
+        class_calendar_date: 'datepicker--calendar__date',
 
         class_year: 'datepicker--year',
 
         class_month: 'datepicker--month',
+        class_month_nav: 'datepicker--month__nav',
+        class_month_prev: 'datepicker--month__prev',
+        class_month_next: 'datepicker--month__next',
 
         class_week: 'datepicker--week',
         class_weekdays: 'datepicker--weekday',
