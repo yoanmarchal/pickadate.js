@@ -1,3 +1,5 @@
+<title>Pickadate.js</title>
+
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="demo.css">
 <link rel="stylesheet" href="pickadate.css">
@@ -13,8 +15,16 @@
         <input id="input_01" class="datepicker" type="text">
     </fieldset>
 
-    <h3>Bind it like this <small>(<a href="docs.htm">see all the options</a>)</small>:</h3>
+    <h3>Bind it like this:</h3>
     <pre><code>$( '.datepicker' ).datepicker()</code></pre>
+
+</section>
+
+
+<section class="holder aligncenter">
+
+    <p><a class="button-full" href="">Download pickadate.js</a></p>
+    <p><a href="docs.htm">Read the docs</a>, <a href="">play with it on Codepen</a> or <a href="">view it on Github</a></p>
 
 </section>
 
@@ -67,7 +77,7 @@
 <section class="holder aligncenter">
 
     <p><a class="button-full" href="">Download pickadate.js</a></p>
-    <p><a href="docs.htm">Read the docs</a> or <a href="">view it on Github</a></p>
+    <p><a href="docs.htm">Read the docs</a>, <a href="">play with it on Codepen</a> or <a href="">view it on Github</a></p>
 
 </section>
 
@@ -90,7 +100,11 @@
 <script src="pickadate.js"></script>
 
 <script type="text/javascript">
-    $( '[type=date], .datepicker' ).datepicker()
+    $( '[type=date], .datepicker' ).first().datepicker({
+        date_min: [ 2012, 11, 3 ],
+        date_max: [ 2012, 11, 21 ]
+        // date_max: 5
+    })
 </script>
 
 

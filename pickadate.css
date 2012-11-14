@@ -19,7 +19,7 @@
     background: #fff;
     font-size: 18px;
     max-width: 320px;
-    min-width: 240px;
+    min-width: 256px;
 
     -webkit-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
        -moz-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
@@ -119,6 +119,16 @@
     background: #0089ec;
     color: #fff;
 }
+
+.datepicker--day__disabled,
+.datepicker--day__disabled:hover {
+    background: #eee;
+    color: red;
+    cursor: default;
+}
+
+
+
 
 
 

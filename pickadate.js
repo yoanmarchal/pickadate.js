@@ -1,5 +1,5 @@
 /*!
-    datepicker.js v0.8.0
+    datepicker.js v0.8.2
     By Amsul (http://amsul.ca)
 
     Updated: 13 November, 2012
@@ -7,6 +7,13 @@
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
     Hosted on http://github.com/amsul/pickadate.js
+
+    TODO: min and max date
+    TODO: add github fork ribbon
+    TODO: if has focus on page load, pop it open
+    TODO: move min and max width over to js
+    TODO: DATE.PARSE AND VARIOUS DATE FORMATS
+    TODO: month & year dropdown selectors
 */
 
 /*jshint
@@ -27,6 +34,7 @@
     var
 
         // Globals & constants
+        SECONDS_IN_DAY = 86400000,
         DAYS_IN_WEEK = 7,
         WEEKS_IN_CALENDAR = 6,
         DAYS_IN_CALENDAR = WEEKS_IN_CALENDAR * DAYS_IN_WEEK,
@@ -178,30 +186,37 @@
                                 // focused month
                                 pseudoIndex,
 
-                                // An index to keep an updated index
-                                // of the day of the week in each loop
-                                dayOfWeekIndex,
-
-                                // A class array that will hold all the
-                                // classes to apply to each looped day
-                                klass,
-
-                                // A data binding to apply to each day
-                                dataBinding,
+                                // An array that will holde the
+                                // classes and binding for each
+                                // looped date
+                                classAndBinding,
 
                                 // Boolean to check if looped day is
                                 // of the month in focus or not.
                                 // Initially set to true
                                 isMonthFocused = true,
 
+                                // Collection of the dates visible on the calendar
+                                // * This gets discarded at the end
+                                calendarDates = [],
+
+                                // Collection of weeks visible on calendar
+                                calendarWeeks = [],
+
                                 // Get today's date
                                 dateToday = P.getDateToday(),
 
-                                // Get the month in focus
-                                monthFocused = P.getMonthFocused(),
+                                // Get the minimum date
+                                dateMinimum = P.getDateMin(),
+
+                                // Get the maximum date
+                                dateMaximum = P.getDateMax(),
 
                                 // Get the selected date
                                 dateSelected = P.getDateSelected(),
+
+                                // Get the month in focus
+                                monthFocused = P.getMonthFocused(),
 
                                 // Count the number of days
                                 // in the focused month
@@ -210,13 +225,69 @@
                                 // Count the days to shift the start of the month
                                 countShiftby = P.getCountShiftDays( monthFocused.DATE, monthFocused.DAY ),
 
-                                // Collection of the dates visible on the calendar
-                                // * This gets discarded at the end
-                                calendarDates = [],
 
-                                // Collection of weeks visible on calendar
-                                calendarWeeks = []
+                                // Set the class and binding for each looped date.
+                                // Returns an array with 2 items:
+                                // 1) The classes string
+                                // 2) The data binding object
+                                setDateClassAndBinding = function( loopDate ) {
 
+                                    var
+
+                                        // Boolean check for date state
+                                        isDateDisabled = false,
+
+                                        // Create a collection for the classes
+                                        // with the default class already included
+                                        klassCollection = [ P.settings.class_calendar_date ]
+
+
+                                    // Set the class as in or out of focus
+                                    // depending on the month
+                                    klassCollection.push( ( isMonthFocused ) ? P.settings.class_day_infocus : P.settings.class_day_outfocus )
+
+
+                                    // If it's less than the minimum date
+                                    // or greater than the maximum date
+                                    if ( loopDate.TIME < dateMinimum.TIME || loopDate.TIME > dateMaximum.TIME ) {
+                                        isDateDisabled = true
+                                        klassCollection.push( P.settings.class_day_disabled )
+                                    }
+
+
+                                    // If it's today, add the class
+                                    if ( loopDate.TIME === dateToday.TIME ) {
+                                        klassCollection.push( P.settings.class_day_today )
+                                    }
+
+
+                                    // If it's the selected date, add the class
+                                    if ( loopDate.TIME === dateSelected.TIME ) {
+                                        klassCollection.push( P.settings.class_day_selected )
+                                    }
+
+
+                                    return [
+
+                                        // Return the joined collection
+                                        klassCollection.join( ' ' ),
+
+                                        // Create the data binding object
+                                        // with the value as a string
+                                        {
+                                            name: ( isDateDisabled ) ? 'disabled' : 'date',
+                                            value: [
+                                                loopDate.YEAR,
+                                                loopDate.MONTH + 1,  // We do +1 just to give an appropriate display
+                                                loopDate.DATE,
+                                                loopDate.DAY
+                                            ].join( '/' )
+                                        }
+                                    ]
+                                } //setDateClassAndBinding
+
+
+                            // console.log( dateMaximum )
 
 
                             // Go through all the days in the calendar
@@ -231,109 +302,48 @@
                                 pseudoIndex = index - countShiftby
 
 
-                                // Figure out the day of the week
-                                dayOfWeekIndex = index % DAYS_IN_WEEK
+                                // Create a new date with a negative or positive pseudoIndex
+                                loopDate = new Date( monthFocused.YEAR, monthFocused.MONTH, pseudoIndex )
 
 
                                 // If the pseudoIndex is zero or negative,
                                 // we need the dates from the previous month.
                                 // If the pseudoIndex is greater than the days
-                                // in the month, we need dates from next month.
+                                // in the month, we set month focused to false
                                 if ( pseudoIndex <= 0 || pseudoIndex > countMonthDays ) {
-
-                                    // Set month focused to false
                                     isMonthFocused = false
-
-                                    // Create a new date with a negative or positive pseudoIndex
-                                    loopDate = new Date( monthFocused.YEAR, monthFocused.MONTH, pseudoIndex )
-
-                                    // Change it into a loop date object
-                                    loopDate = {
-                                        YEAR: loopDate.getFullYear(),
-                                        MONTH: loopDate.getMonth(),
-                                        DATE: loopDate.getDate(),
-                                        DAY: dayOfWeekIndex
-                                    }
                                 }
-
 
                                 // If the pseudoIndex is greater than 0
                                 // and less than or equal to number of
-                                // days in the month, we generate
-                                // all the dates this month
+                                // days in the month, we set
+                                // month focused to true
                                 else {
-
-                                    // Set month focused to true
                                     isMonthFocused = true
-
-                                    // Create a loop date object
-                                    loopDate = {
-
-                                        // Same as focused year
-                                        YEAR: monthFocused.YEAR,
-
-                                        // Same as focused month
-                                        MONTH: monthFocused.MONTH,
-
-                                        // The date is the pseudoIndex
-                                        DATE: pseudoIndex,
-
-                                        // The day is the index position in the week
-                                        DAY: dayOfWeekIndex
-                                    }
-
                                 }
 
 
-                                // Set the classes
-                                klass = (function() {
-
-                                    // Create a collection for the classes
-                                    var klassCollection = [ P.settings.class_calendar_date ]
-
-
-                                    // Set the class as in or out of focus
-                                    // depending on the month
-                                    klassCollection.push( ( isMonthFocused ) ? P.settings.class_day_infocus : P.settings.class_day_outfocus )
-
-
-                                    // If it's today, add the class
-                                    if ( loopDate.DATE === dateToday.DATE && loopDate.MONTH === dateToday.MONTH && loopDate.YEAR === dateToday.YEAR ) {
-                                        klassCollection.push( P.settings.class_day_today )
-                                    }
-
-
-                                    // If it's the selected date, add the class
-                                    if ( loopDate.DATE === dateSelected.DATE && loopDate.MONTH === dateSelected.MONTH && loopDate.YEAR === dateSelected.YEAR ) {
-                                        klassCollection.push( P.settings.class_day_selected )
-                                    }
-
-
-                                    // Return the joined collection
-                                    return klassCollection.join( ' ' )
-                                })()
-
-
-                                // Create the data binding object
-                                // with the value as a string
-                                dataBinding = {
-                                    name: 'date',
-                                    value: [
-                                        loopDate.YEAR,
-                                        loopDate.MONTH + 1,  // We do +1 just to give an appropriate display
-                                        loopDate.DATE,
-                                        loopDate.DAY
-                                    ].join( '/' )
+                                // Create a loop date object
+                                loopDate = {
+                                    YEAR: loopDate.getFullYear(),
+                                    MONTH: loopDate.getMonth(),
+                                    DATE: loopDate.getDate(),
+                                    DAY: loopDate.getDay(),
+                                    TIME: loopDate.getTime()
                                 }
+
+
+                                // Set the date class and bindings on the looped date
+                                classAndBinding = setDateClassAndBinding( loopDate )
 
 
                                 // Pass the item to the calendar array
-                                calendarDates.push( create( 'td', loopDate.DATE, klass, dataBinding ) )
+                                calendarDates.push( create( 'td', loopDate.DATE, classAndBinding[ 0 ], classAndBinding[ 1 ] ) )
 
 
                                 // Check if it's the end of a week.
                                 // * We add 1 for 0index compensation
-                                if ( dayOfWeekIndex + 1 === DAYS_IN_WEEK ) {
+                                if ( index % DAYS_IN_WEEK + 1 === DAYS_IN_WEEK ) {
 
                                     // Wrap the week and pass it into the calendar weeks
                                     calendarWeeks.push( create( 'tr', calendarDates.splice( 0, DAYS_IN_WEEK ) ) )
@@ -368,7 +378,9 @@
                         } //getDefaultCalendarItems
 
 
-
+                    /**
+                     * Return the calendar object methods
+                     */
                     return {
 
                         /**
@@ -680,10 +692,94 @@
                             YEAR: dateToday.getFullYear(),
                             MONTH: dateToday.getMonth(),
                             DATE: dateToday.getDate(),
-                            DAY: dateToday.getDay()
+                            DAY: dateToday.getDay(),
+                            TIME: dateToday.getTime()
                         }
                     })()
                 }, //getDateToday
+
+
+
+                /**
+                 *  Get the minimum date allowed on the calendar
+                 */
+                getDateMin: function() {
+
+                    return P.DATE_MIN || (function( settingsDate ) {
+
+                        var dateMinimum
+
+                        // Return false if there is no minimum date
+                        if ( !settingsDate ) { return false }
+
+
+                        // Check if the date is an array
+                        if ( isArray( settingsDate ) ) {
+
+                            // Construct the date
+                            dateMinimum = new Date( settingsDate[ 0 ], settingsDate[ 1 ] - 1, settingsDate[ 2 ] )
+                        }
+
+                        // For everything else
+                        else {
+
+                            // Set the minimum date to today
+                            dateMinimum = new Date()
+                        }
+
+                        // Create and return the calendar date object
+                        return P.DATE_MIN = {
+                            YEAR: dateMinimum.getFullYear(),
+                            MONTH: dateMinimum.getMonth(),
+                            DATE: dateMinimum.getDate(),
+                            DAY: dateMinimum.getDay(),
+                            TIME: dateMinimum.getTime()
+                        }
+                    })( P.settings.date_min )
+                }, //getDateMin
+
+
+
+                /**
+                 *  Get the maximum date allowed on the calendar
+                 */
+                getDateMax: function() {
+
+                    return P.DATE_MAX || (function( settingsDate, dateToday ) {
+
+                        var dateMaximum
+
+                        // Return false if there is no maximum date
+                        if ( !settingsDate ) { return false }
+
+
+                        // Check if a number was passed
+                        if ( !isNaN( settingsDate ) && settingsDate > 0 ) {
+
+                            // Set the maximum date by adding the number
+                            dateMaximum = new Date( dateToday.YEAR, dateToday.MONTH, dateToday.DATE + settingsDate )
+                        }
+
+                        // Check if an array was passed
+                        else if ( isArray( settingsDate ) ) {
+
+                            // Construct the date
+                            dateMaximum = new Date( settingsDate[ 0 ], settingsDate[ 1 ] - 1, settingsDate[ 2 ] )
+                        }
+
+                        // Return false for everything else
+                        else { return false }
+
+                        // Create and return the calendar date object
+                        return P.DATE_MAX = {
+                            YEAR: dateMaximum.getFullYear(),
+                            MONTH: dateMaximum.getMonth(),
+                            DATE: dateMaximum.getDate(),
+                            DAY: dateMaximum.getDay(),
+                            TIME: dateMaximum.getTime()
+                        }
+                    })( P.settings.date_max, P.getDateToday() )
+                }, //getDateMax
 
 
 
@@ -771,7 +867,8 @@
                             YEAR: dateSelected.getFullYear(),
                             MONTH: dateSelected.getMonth(),
                             DATE: dateSelected.getDate(),
-                            DAY: dateSelected.getDay()
+                            DAY: dateSelected.getDay(),
+                            TIME: dateSelected.getTime()
                         }
                     })()
                 }, //getDateSelected
@@ -962,6 +1059,14 @@
         month_prev: '&#9664;',
         month_next: '&#9654;',
 
+        // Date limits
+        date_min: true,
+        date_max: false,
+
+        // Calendar widths
+        // width_min: 256,
+        // width_max: 320 or none??,
+
         class_picker_open: 'datepicker--opened',
         class_picker_holder: 'datepicker--holder',
 
@@ -981,6 +1086,7 @@
         class_week: 'datepicker--week',
         class_weekdays: 'datepicker--weekday',
 
+        class_day_disabled: 'datepicker--day__disabled',
         class_day_selected: 'datepicker--day__selected',
         class_day_today: 'datepicker--day__today',
         class_day_infocus: 'datepicker--day__infocus',

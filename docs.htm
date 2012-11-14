@@ -1,3 +1,5 @@
+<title>Pickadate.js &#8226; Documentation</title>
+
 <link rel="stylesheet" href="style.css">
 <link rel="stylesheet" href="demo.css">
 <link rel="stylesheet" href="pickadate.css">
@@ -8,7 +10,7 @@
     <h1><a href="../pickadate/" class="link-inherit"><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong></a></h1>
     <h2>A lightweight jQuery dateinput picker</h2>
 
-    <h4><a href="">Download pickadate.js</a> or <a href="">view it on Github</a></h4>
+    <h4><a href="">Download pickadate.js</a>, <a href="">play with it on Codepen</a> or <a href="">view it on Github</a></h4>
 
 </section>
 
@@ -16,43 +18,43 @@
 <section class="holder">
 
     <h3>All the options and default settings:</h3>
-    <pre><code>$( '.datepicker' ).datepicker({
-    months_full: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ],
-    months_short: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
-    days_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
-    days_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+    <pre><code>// Strings
+months_full: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ],
+months_short: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
+days_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
+days_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+month_prev: '&amp;#9664;',
+month_next: '&amp;#9654;',
 
-    month_prev: '&amp;#9664;',
-    month_next: '&amp;#9654;',
+// Date limits
+date_min: true,
+date_max: false,
 
-    class_picker_open: 'datepicker--opened',
-    class_picker_holder: 'datepicker--holder',
+// Calendar widths
+width_min: 256,
+width_max: 320 or none??,
 
-    class_calendar_box: 'datepicker--calendar__box',
-
-    class_calendar: 'datepicker--calendar',
-    class_calendar_body: 'datepicker--calendar__body',
-    class_calendar_date: 'datepicker--calendar__date',
-
-    class_year: 'datepicker--year',
-
-    class_month: 'datepicker--month',
-    class_month_nav: 'datepicker--month__nav',
-    class_month_prev: 'datepicker--month__prev',
-    class_month_next: 'datepicker--month__next',
-
-    class_week: 'datepicker--week',
-    class_weekdays: 'datepicker--weekday',
-
-    class_day_selected: 'datepicker--day__selected',
-    class_day_today: 'datepicker--day__today',
-    class_day_infocus: 'datepicker--day__infocus',
-    class_day_outfocus: 'datepicker--day__outfocus',
-
-    class_box_months: 'datepicker--holder__months',
-    class_box_years: 'datepicker--holder__years',
-    class_box_weekdays: 'datepicker--holder__weekdays'
-})</code></pre>
+// Classes
+class_picker_open: 'datepicker--opened',
+class_picker_holder: 'datepicker--holder',
+class_calendar_box: 'datepicker--calendar__box',
+class_calendar: 'datepicker--calendar',
+class_calendar_body: 'datepicker--calendar__body',
+class_calendar_date: 'datepicker--calendar__date',
+class_year: 'datepicker--year',
+class_month: 'datepicker--month',
+class_month_nav: 'datepicker--month__nav',
+class_month_prev: 'datepicker--month__prev',
+class_month_next: 'datepicker--month__next',
+class_week: 'datepicker--week',
+class_weekdays: 'datepicker--weekday',
+class_day_selected: 'datepicker--day__selected',
+class_day_today: 'datepicker--day__today',
+class_day_infocus: 'datepicker--day__infocus',
+class_day_outfocus: 'datepicker--day__outfocus',
+class_box_months: 'datepicker--holder__months',
+class_box_years: 'datepicker--holder__years',
+class_box_weekdays: 'datepicker--holder__weekdays'</code></pre>
 
 </section>
 
@@ -72,13 +74,14 @@
 <section class="holder">
 
     <fieldset>
-        <h3><label for="input_02">The custom next and previous month tags:</label></h3>
+        <h3><label for="input_02">The custom month navigation and weekday tags:</label></h3>
         <input id="input_02" class="datepicker" type="text">
     </fieldset>
 
     <pre><code>$( '.datepicker' ).datepicker({
     month_prev: '&amp;larr;',
-    month_next: '&amp;rarr;'
+    month_next: '&amp;rarr;',
+    days_short: [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ]
 })</code></pre>
 
 </section>
@@ -192,7 +195,7 @@ tr:last-child .datepicker--calendar__date {
 <section class="holder aligncenter">
 
     <p><a class="button-full" href="">Download pickadate.js</a></p>
-    <p><a href="">Or, view it on Github</a></p>
+    <p><a href="">Play with it on Codepen</a> or <a href="">view it on Github</a></p>
 
 </section>
 
@@ -210,7 +213,8 @@ tr:last-child .datepicker--calendar__date {
 
     $( '#input_02' ).datepicker({
         month_prev: '&larr;',
-        month_next: '&rarr;'
+        month_next: '&rarr;',
+        days_short: [ 'Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa' ]
     })
 
     $( '#input_03' ).datepicker()
