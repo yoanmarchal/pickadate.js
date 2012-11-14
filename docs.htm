@@ -5,9 +5,54 @@
 
 <section class="holder">
 
-    <h1><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong> a lightweight jQuery dateinput picker</h1>
+    <h1><a href="../pickadate/" class="link-inherit"><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong></a></h1>
+    <h2>A lightweight jQuery dateinput picker</h2>
 
-    <h5><a href="../datepicker/">View the demo</a>, <a href="">download pickadate.min.js</a> or <a href="">view it on Github</a></h5>
+    <h4><a href="">Download pickadate.js</a> or <a href="">view it on Github</a></h4>
+
+</section>
+
+
+<section class="holder">
+
+    <h3>All the options and default settings:</h3>
+    <pre><code>$( '.datepicker' ).datepicker({
+    months_full: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ],
+    months_short: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
+    days_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
+    days_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+
+    month_prev: '&amp;#9664;',
+    month_next: '&amp;#9654;',
+
+    class_picker_open: 'datepicker--opened',
+    class_picker_holder: 'datepicker--holder',
+
+    class_calendar_box: 'datepicker--calendar__box',
+
+    class_calendar: 'datepicker--calendar',
+    class_calendar_body: 'datepicker--calendar__body',
+    class_calendar_date: 'datepicker--calendar__date',
+
+    class_year: 'datepicker--year',
+
+    class_month: 'datepicker--month',
+    class_month_nav: 'datepicker--month__nav',
+    class_month_prev: 'datepicker--month__prev',
+    class_month_next: 'datepicker--month__next',
+
+    class_week: 'datepicker--week',
+    class_weekdays: 'datepicker--weekday',
+
+    class_day_selected: 'datepicker--day__selected',
+    class_day_today: 'datepicker--day__today',
+    class_day_infocus: 'datepicker--day__infocus',
+    class_day_outfocus: 'datepicker--day__outfocus',
+
+    class_box_months: 'datepicker--holder__months',
+    class_box_years: 'datepicker--holder__years',
+    class_box_weekdays: 'datepicker--holder__weekdays'
+})</code></pre>
 
 </section>
 
@@ -79,7 +124,11 @@
         .datepicker-themed .datepicker--calendar__date:last-child {
             border-right: 1px solid #0099ec;
         }
-        .datepicker-themed .datepicker-themed .datepicker--day__selected,
+        .datepicker-themed .datepicker--day__today {
+            background: #0099ec;
+            color: #fff;
+        }
+        .datepicker-themed .datepicker--day__selected,
         .datepicker-themed .datepicker--day__infocus:hover,
         .datepicker-themed .datepicker--day__outfocus:hover,
         .datepicker-themed .datepicker--month__prev:hover,
@@ -91,7 +140,7 @@
     </style>
 
     <fieldset class="datepicker-themed">
-        <h3><label for="input_03">The themed calendar*:</label></h3>
+        <h3><label for="input_03">The themed calendar:</label></h3>
         <input id="input_03" class="datepicker" type="text">
     </fieldset>
 
@@ -100,14 +149,8 @@
     background: #0089ec;
     color: #fff;
     left: 6px;
-
-    -webkit-box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
-       -moz-box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
-            box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
-
-    -webkit-border-radius: 0;
-       -moz-border-radius: 0;
-            border-radius: 0;
+    box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
+    border-radius: 0;
 }
 .datepicker--year,
 .datepicker--weekday,
@@ -121,10 +164,7 @@
 .datepicker--calendar__date {
     border-left: 1px solid #0099ec;
     border-top: 1px solid #0099ec;
-
-    -webkit-border-radius: 0;
-       -moz-border-radius: 0;
-            border-radius: 0;
+    border-radius: 0;
 }
 tr:last-child .datepicker--calendar__date {
     border-bottom: 1px solid #0099ec;
@@ -132,7 +172,11 @@ tr:last-child .datepicker--calendar__date {
 .datepicker--calendar__date:last-child {
     border-right: 1px solid #0099ec;
 }
-.datepicker-themed .datepicker--day__selected,
+.datepicker--day__today {
+    background: #0099ec;
+    color: #fff;
+}
+.datepicker--day__selected,
 .datepicker--day__infocus:hover,
 .datepicker--day__outfocus:hover,
 .datepicker--month__prev:hover,
@@ -147,8 +191,8 @@ tr:last-child .datepicker--calendar__date {
 
 <section class="holder aligncenter">
 
-    <p><a class="button-full" href="">Download pickadate.min.js</a></p>
-    <p><a href="../datepicker/">View the demo</a> or <a href="">view it on Github</a></p>
+    <p><a class="button-full" href="">Download pickadate.js</a></p>
+    <p><a href="">Or, view it on Github</a></p>
 
 </section>
 
