@@ -1,5 +1,5 @@
 /*!
-    datepicker.js v0.8.2
+    datepicker.js v0.8.6
     By Amsul (http://amsul.ca)
 
     Updated: 13 November, 2012
@@ -8,11 +8,10 @@
     Licensed under MIT ("expat" flavour) license.
     Hosted on http://github.com/amsul/pickadate.js
 
-    TODO: min and max date
     TODO: add github fork ribbon
     TODO: if has focus on page load, pop it open
-    TODO: move min and max width over to js
-    TODO: DATE.PARSE AND VARIOUS DATE FORMATS
+    TODO: move base stylings over to js
+    TODO: Date.parse & various date formats
     TODO: month & year dropdown selectors
 */
 
@@ -146,10 +145,22 @@
                         createMonthNav = function() {
 
                             var
-                                prev = create( 'div', P.settings.month_prev, P.settings.class_month_prev, { name: 'nav', value: 'prev' } ),
-                                next = create( 'div', P.settings.month_next, P.settings.class_month_next, { name: 'nav', value: 'next' } )
+                                createMonthTag = function( tagName ) {
 
-                            return prev + next
+                                    // If the tag is 'prev', and month focused is
+                                    // less or equal to the minimum date month,
+                                    // or if tag is 'next' month focused is
+                                    // greater or equal to the maximum date month,
+                                    // return an empty string
+                                    if ( tagName === 'prev' && P.MONTH_FOCUSED.MONTH <= P.DATE_MIN.MONTH || tagName === 'next' && P.MONTH_FOCUSED.MONTH >= P.DATE_MAX.MONTH ) {
+                                        return ''
+                                    }
+
+                                    // Otherwise, return the created tag
+                                    return create( 'div', P.settings[ 'month_' + tagName ], P.settings[ 'class_month_' + tagName ], { name: 'nav', value: tagName } )
+                                }
+
+                            return createMonthTag( 'prev' ) + createMonthTag( 'next' )
                         }, //createMonthNav
 
                         /**
@@ -287,8 +298,6 @@
                                 } //setDateClassAndBinding
 
 
-                            // console.log( dateMaximum )
-
 
                             // Go through all the days in the calendar
                             // and map a calendar date
@@ -305,24 +314,6 @@
                                 // Create a new date with a negative or positive pseudoIndex
                                 loopDate = new Date( monthFocused.YEAR, monthFocused.MONTH, pseudoIndex )
 
-
-                                // If the pseudoIndex is zero or negative,
-                                // we need the dates from the previous month.
-                                // If the pseudoIndex is greater than the days
-                                // in the month, we set month focused to false
-                                if ( pseudoIndex <= 0 || pseudoIndex > countMonthDays ) {
-                                    isMonthFocused = false
-                                }
-
-                                // If the pseudoIndex is greater than 0
-                                // and less than or equal to number of
-                                // days in the month, we set
-                                // month focused to true
-                                else {
-                                    isMonthFocused = true
-                                }
-
-
                                 // Create a loop date object
                                 loopDate = {
                                     YEAR: loopDate.getFullYear(),
@@ -330,6 +321,20 @@
                                     DATE: loopDate.getDate(),
                                     DAY: loopDate.getDay(),
                                     TIME: loopDate.getTime()
+                                }
+
+
+                                // If the pseudoIndex is zero or negative,
+                                // we need the dates from the previous month.
+                                // If the pseudoIndex is greater than the days
+                                // in the month, we need dates from the next month.
+                                if ( pseudoIndex <= 0 || pseudoIndex > countMonthDays ) {
+                                    isMonthFocused = false
+                                }
+
+                                // Otherwise we need dates from the focused month.
+                                else {
+                                    isMonthFocused = true
                                 }
 
 
