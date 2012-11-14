@@ -1,16 +1,13 @@
 /*!
-    datepicker.js v0.8.6
+    datepicker.js v0.9.2
     By Amsul (http://amsul.ca)
 
-    Updated: 13 November, 2012
+    Updated: 14 November, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
     Hosted on http://github.com/amsul/pickadate.js
 
-    TODO: add github fork ribbon
-    TODO: if has focus on page load, pop it open
-    TODO: move base stylings over to js
     TODO: Date.parse & various date formats
     TODO: month & year dropdown selectors
 */
@@ -56,11 +53,11 @@
             // If the item is an array, do a join
             item = ( isArray( item ) ) ? item.join( '' ) : item
 
-            // Check for a class
-            klass = ( klass ) ? ' class="' + klass + '"' : ''
-
             // Check for a data binding
             data = ( data && data.name ) ? ' data-' + data.name + '="' + data.value + '"' : ''
+
+            // Check for a class
+            klass = ( klass ) ? ' class="' + klass + '"' : ''
 
             // Return the wrapped item
             return '<' + wrapper + data + klass + '>' + item + '</' + wrapper + '>'
@@ -126,6 +123,13 @@
                     // immediately render it
                     P.calendar = P.createCalendarObject().render()
 
+                    // If the calendar has focus on load
+                    if ( P.$element[ 0 ] === document.activeElement ) {
+
+                        // Trigger the focus handler
+                        P.$element.trigger( 'focus' )
+                    }
+
                     return P
                 }, //create
 
@@ -152,7 +156,7 @@
                                     // or if tag is 'next' month focused is
                                     // greater or equal to the maximum date month,
                                     // return an empty string
-                                    if ( tagName === 'prev' && P.MONTH_FOCUSED.MONTH <= P.DATE_MIN.MONTH || tagName === 'next' && P.MONTH_FOCUSED.MONTH >= P.DATE_MAX.MONTH ) {
+                                    if ( P.DATE_MIN && ( tagName === 'prev' && P.MONTH_FOCUSED.MONTH <= P.DATE_MIN.MONTH && P.MONTH_FOCUSED.YEAR <= P.DATE_MIN.YEAR ) || P.DATE_MAX && ( tagName === 'next' && P.MONTH_FOCUSED.MONTH >= P.DATE_MAX.MONTH && P.MONTH_FOCUSED.YEAR >= P.DATE_MAX.YEAR ) ) {
                                         return ''
                                     }
 
@@ -443,7 +447,6 @@
                                 return calendarObject
                             }
 
-
                             // Otherwise if there's no calendar holder
                             // wrap the box with the holder and
                             // create the jQuery object
@@ -475,6 +478,7 @@
 
                                 mouseenter: onCalendarActive,
                                 mouseleave: onCalendarInactive
+
                             }).after( P.$calendarHolder )
 
 
@@ -692,6 +696,9 @@
                         // Create a new date for today
                         var dateToday = new Date()
 
+                        // Set the time to midnight (for comparison purposes)
+                        dateToday.setHours( 0, 0, 0, 0 )
+
                         // Create and return the calendar date object
                         return P.DATE_TODAY = {
                             YEAR: dateToday.getFullYear(),
@@ -718,19 +725,15 @@
                         if ( !settingsDate ) { return false }
 
 
-                        // Check if the date is an array
-                        if ( isArray( settingsDate ) ) {
-
-                            // Construct the date
-                            dateMinimum = new Date( settingsDate[ 0 ], settingsDate[ 1 ] - 1, settingsDate[ 2 ] )
+                        // If the date is not an array,
+                        // set the minimum date to today
+                        if ( !isArray( settingsDate ) ) {
+                            return dateMinimum = P.getDateToday()
                         }
 
-                        // For everything else
-                        else {
 
-                            // Set the minimum date to today
-                            dateMinimum = new Date()
-                        }
+                        // Otherwise construct the date
+                        dateMinimum = new Date( settingsDate[ 0 ], settingsDate[ 1 ] - 1, settingsDate[ 2 ] )
 
                         // Create and return the calendar date object
                         return P.DATE_MIN = {

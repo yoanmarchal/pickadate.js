@@ -10,6 +10,8 @@
     <h1><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong></h1>
     <h2>A lightweight jQuery dateinput picker <small>(<a title="Documentation" href="docs.htm">read the docs</a>)</small></h2>
 
+    <a href="https://github.com/you"><img width="124" height="124" style="position:absolute;top:0;right:0;border:0;" src="https://s3.amazonaws.com/github/ribbons/forkme_right_darkblue_121621.png" alt="Fork me on GitHub"></a>
+
     <fieldset>
         <h3><label for="input_01">Pick a date. Go ahead...</label></h3>
         <input id="input_01" class="datepicker" type="text">
@@ -100,10 +102,12 @@
 <script src="pickadate.js"></script>
 
 <script type="text/javascript">
-    $( '[type=date], .datepicker' ).first().datepicker({
-        date_min: [ 2012, 11, 3 ],
-        date_max: [ 2012, 11, 21 ]
+    $( '[type=date], .datepicker' )/*.first()*/.datepicker({
+        // date_min: false
+        // date_min: [ 2012, 10, 30 ],
+        // date_max: [ 2012, 12, 21 ]
         // date_max: 5
+        // date_max: true
     })
 </script>
 
