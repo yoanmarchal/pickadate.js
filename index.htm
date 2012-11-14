@@ -1,0 +1,92 @@
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="demo.css">
+<link rel="stylesheet" href="pickadate.css">
+
+
+<section class="holder">
+
+    <h1><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong> a lightweight jQuery dateinput picker</h1>
+
+    <h3>I didn't like any of the date picker plugins out there. So I made this <small>(<a href="docs.htm">read the documentation</a>)</small>.</h3>
+
+    <fieldset>
+        <h3><label for="input_01">Pick a date. Go ahead...</label></h3>
+        <input id="input_01" class="datepicker" type="text">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_02">Here's one with the date already filled in:</label></h3>
+        <input id="input_02" class="datepicker" type="text" value="14 August 2012">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_03">Use the scary&#42; <code>type="date"</code>:</label></h3>
+        <input id="input_03" type="date" value="31 October 2012">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_04">Or, the friendly&#42;&#42; <code>type="text"</code>:</label></h3>
+        <input id="input_04" class="datepicker" type="text" value="25 December 2012">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_05">Did I mention it's excitingly lightweight?</label></h3>
+        <input id="input_05" class="datepicker" type="text" value="1 January 2013">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_06">You're in love with it now, aren't you?</label></h3>
+        <input id="input_06" class="datepicker" type="text" value="14 February 2013">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_07">I'm actually pretty unique.</label></h3>
+        <input id="input_07" class="datepicker" type="text" value="29 February 2016">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_08">Others will fool you into believing they're cool.</label></h3>
+        <input id="input_08" class="datepicker" type="text" value="1 April 2013">
+    </fieldset>
+
+    <fieldset>
+        <h3><label for="input_09">But honestly, who's the coolest around the house?</label></h3>
+        <input id="input_09" class="datepicker" type="text" value="12 May 2013">
+    </fieldset>
+
+</section>
+
+
+<section class="holder aligncenter">
+
+    <p><a class="button-full" href="">Download pickadate.min.js</a></p>
+    <p><a href="docs.htm">Read the docs</a> or <a href="">view it on Github</a></p>
+
+</section>
+
+
+<section class="holder">
+
+    <hr>
+
+    <small class="dimmed">
+        <p>&#42; Scary, because there's a tiny height change on page load for <i>some</i> browsers. That's because the input element is changed from <code>type="date"</code> to <code>type="text"</code> to remove the default browser stylings.</p>
+        <p>&#42;&#42; Friendly, because.. well everyone loves Santa :)</p>
+    </small>
+</section>
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br>
+
+
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script src="pickadate.js"></script>
+
+<script type="text/javascript">
+    $( '[type=date], .datepicker' ).datepicker()
+</script>
+
+
+
+
+

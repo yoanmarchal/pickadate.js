@@ -1,12 +1,12 @@
 /*!
-    datepicker.js v0.5.0
+    datepicker.js v0.8.0
     By Amsul (http://amsul.ca)
 
-    Updated: 12 November, 2012
+    Updated: 13 November, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
-    Hosted on http://github.com/amsul/datepicker.js
+    Hosted on http://github.com/amsul/pickadate.js
 */
 
 /*jshint
@@ -396,14 +396,12 @@
 
                                     // Return the collection
                                     return collection
-                                })(),
+                                })(), //calendarItems
 
 
-                                // Create a new calendar holder and box
+                                // Create a new calendar box
                                 // with the items collection
-                                calendarHolderString = create( 'div', (function() {
-                                    return create( 'div', calendarItems, P.settings.class_calendar_box )
-                                })(), P.settings.class_picker_holder ),
+                                calendarBoxString = create( 'div', calendarItems, P.settings.class_calendar_box ),
 
 
                                 // Event to set the calendar as active
@@ -422,17 +420,18 @@
                             if ( P.$calendarHolder ) {
 
                                 // Just replace it with the calendar string
-                                P.$calendarHolder.html( calendarHolderString )
+                                P.$calendarHolder.html( calendarBoxString )
 
                                 // And then return
                                 return calendarObject
                             }
 
 
-                            // Otherwise if there's no calendar box
-                            // create the jQuery calendar box
+                            // Otherwise if there's no calendar holder
+                            // wrap the box with the holder and
+                            // create the jQuery object
                             // while binding delegated events
-                            P.$calendarHolder = $( calendarHolderString ).on({
+                            P.$calendarHolder = $( create( 'div', calendarBoxString, P.settings.class_picker_holder ) ).on({
                                 click: P.onClickCalendar,
                                 mouseenter: onCalendarActive,
                                 mouseleave: onCalendarInactive
@@ -442,8 +441,21 @@
                             // Insert the calendar after the element
                             // while binding the events
                             P.$element.on({
+
+                                // Prevent user from keying a value
                                 keypress: function() { return false },
-                                focusin: function() { P.calendar.open() },
+
+                                // On tab, close the calendar
+                                keydown: function( event ) {
+                                    var keycode = ( event.keyCode ) ? event.keyCode : event.which
+                                    if ( keycode === 9 ) {
+                                        P.calendar.close()
+                                    }
+                                },
+
+                                // On focus, open the calendar
+                                focusin: function() { P.calendar.open() },
+
                                 mouseenter: onCalendarActive,
                                 mouseleave: onCalendarInactive
                             }).after( P.$calendarHolder )
@@ -481,6 +493,12 @@
                                         P.calendar.close()
                                     }
                                 }
+
+
+                            // If it's already open, do nothing
+                            if ( calendarObject.isOpen ) {
+                                return calendarObject
+                            }
 
 
                             // Set calendar as open
@@ -614,7 +632,7 @@
                             if ( $dayTargeted ) {
 
                                 // Set the element value
-                                P.$element[ 0 ].value = P.DATE_SELECTED.YEAR + ' ' + P.getSelectedMonth() + ' ' + P.DATE_SELECTED.DATE
+                                P.$element[ 0 ].value = P.DATE_SELECTED.DATE + ' ' + P.getSelectedMonth() + ' ' + P.DATE_SELECTED.YEAR
 
                                 // Close the calendar
                                 calendarObject.close()
@@ -677,7 +695,7 @@
 
                     // If there's a date set to focus, return it
                     // otherwise focus on today
-                    return P.MONTH_FOCUSED || ( P.MONTH_FOCUSED = P.getDateToday() )
+                    return P.MONTH_FOCUSED || ( P.MONTH_FOCUSED = P.getDateSelected() )
                 }, //getMonthFocused
 
                 /**
@@ -735,13 +753,13 @@
                     // otherwise figure out the date
                     return P.DATE_SELECTED || (function() {
 
-                        var dateSelected
+                        var
+                            // Create a new date from the input element
+                            dateSelected = new Date( P.$element[ 0 ].value )
 
-                        // Get the date from the input element
-                        // -- todo
 
                         // If there's no date in the input
-                        if ( !dateSelected ) {
+                        if ( dateSelected.toString() === 'Invalid Date' || isNaN( dateSelected ) ) {
 
                             // Get and return today's date
                             return P.DATE_SELECTED = P.getDateToday()
@@ -905,11 +923,16 @@
 
                         // Change the month according to direction
                         P.calendar.changeMonth( targetData.nav )
+
+                        // Put focus back onto the element
+                        P.$element.focus()
                     }
 
                     // If it's something else
                     else {
-                        console.log( 'something else', targetData )
+
+                        // Put focus back onto the element
+                        P.$element.focus()
                     }
 
                 } //onClickCalendar

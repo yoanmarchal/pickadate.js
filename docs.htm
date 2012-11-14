@@ -1,0 +1,183 @@
+<link rel="stylesheet" href="style.css">
+<link rel="stylesheet" href="demo.css">
+<link rel="stylesheet" href="pickadate.css">
+
+
+<section class="holder">
+
+    <h1><strong title="Pick a Date" class="underline-highlight">pickadate.js</strong> a lightweight jQuery dateinput picker</h1>
+
+    <h5><a href="../datepicker/">View the demo</a>, <a href="">download pickadate.min.js</a> or <a href="">view it on Github</a></h5>
+
+</section>
+
+
+<section class="holder">
+
+    <fieldset>
+        <h3><label for="input_01">The simple setup:</label></h3>
+        <input id="input_01" class="datepicker" type="text">
+    </fieldset>
+
+    <pre><code>$( '.datepicker' ).datepicker()</code></pre>
+
+</section>
+
+
+<section class="holder">
+
+    <fieldset>
+        <h3><label for="input_02">The custom next and previous month tags:</label></h3>
+        <input id="input_02" class="datepicker" type="text">
+    </fieldset>
+
+    <pre><code>$( '.datepicker' ).datepicker({
+    month_prev: '&amp;larr;',
+    month_next: '&amp;rarr;'
+})</code></pre>
+
+</section>
+
+
+<section class="holder">
+
+    <style>
+        .datepicker-themed .datepicker--calendar__box {
+            border: none;
+            background: #0089ec;
+            color: #fff;
+            left: 6px;
+
+            -webkit-box-shadow: 0 0 0 6px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.2);
+               -moz-box-shadow: 0 0 0 6px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.2);
+                    box-shadow: 0 0 0 6px rgba(0,0,0,.1), 0 0 0 1px rgba(0,0,0,.2);
+
+            -webkit-border-radius: 0;
+               -moz-border-radius: 0;
+                    border-radius: 0;
+        }
+        .datepicker-themed .datepicker--year,
+        .datepicker-themed .datepicker--weekday,
+        .datepicker-themed .datepicker--day__outfocus {
+            color: #cae2ff;
+            font-size: .8em;
+        }
+        .datepicker-themed .datepicker--day__infocus {
+            color: #fff;
+        }
+        .datepicker-themed .datepicker--calendar__date {
+            border-left: 1px solid #0099ec;
+            border-top: 1px solid #0099ec;
+
+            -webkit-border-radius: 0;
+               -moz-border-radius: 0;
+                    border-radius: 0;
+        }
+        .datepicker-themed tr:last-child .datepicker--calendar__date {
+            border-bottom: 1px solid #0099ec;
+        }
+        .datepicker-themed .datepicker--calendar__date:last-child {
+            border-right: 1px solid #0099ec;
+        }
+        .datepicker-themed .datepicker-themed .datepicker--day__selected,
+        .datepicker-themed .datepicker--day__infocus:hover,
+        .datepicker-themed .datepicker--day__outfocus:hover,
+        .datepicker-themed .datepicker--month__prev:hover,
+        .datepicker-themed .datepicker--month__next:hover {
+            background: #fff;
+            color: #0089ec;
+            font-weight: bold;
+        }
+    </style>
+
+    <fieldset class="datepicker-themed">
+        <h3><label for="input_03">The themed calendar*:</label></h3>
+        <input id="input_03" class="datepicker" type="text">
+    </fieldset>
+
+    <pre><code>.datepicker--calendar__box {
+    border: none;
+    background: #0089ec;
+    color: #fff;
+    left: 6px;
+
+    -webkit-box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
+       -moz-box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
+            box-shadow: 0 24px 64px 24px rgba(0,0,0,.24);
+
+    -webkit-border-radius: 0;
+       -moz-border-radius: 0;
+            border-radius: 0;
+}
+.datepicker--year,
+.datepicker--weekday,
+.datepicker--day__outfocus {
+    color: #cae2ff;
+    font-size: .8em;
+}
+.datepicker--day__infocus {
+    color: #fff;
+}
+.datepicker--calendar__date {
+    border-left: 1px solid #0099ec;
+    border-top: 1px solid #0099ec;
+
+    -webkit-border-radius: 0;
+       -moz-border-radius: 0;
+            border-radius: 0;
+}
+tr:last-child .datepicker--calendar__date {
+    border-bottom: 1px solid #0099ec;
+}
+.datepicker--calendar__date:last-child {
+    border-right: 1px solid #0099ec;
+}
+.datepicker-themed .datepicker--day__selected,
+.datepicker--day__infocus:hover,
+.datepicker--day__outfocus:hover,
+.datepicker--month__prev:hover,
+.datepicker--month__next:hover {
+    background: #fff;
+    color: #0089ec;
+    font-weight: bold;
+}</code></pre>
+
+</section>
+
+
+<section class="holder aligncenter">
+
+    <p><a class="button-full" href="">Download pickadate.min.js</a></p>
+    <p><a href="../datepicker/">View the demo</a> or <a href="">view it on Github</a></p>
+
+</section>
+
+
+
+<br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><br><small><small class="dimmed">wassup kids!</small></small>
+
+
+<script src="http://code.jquery.com/jquery-1.8.2.min.js"></script>
+<script src="pickadate.js"></script>
+
+<script type="text/javascript">
+
+    $( '#input_01' ).datepicker()
+
+    $( '#input_02' ).datepicker({
+        month_prev: '&larr;',
+        month_next: '&rarr;'
+    })
+
+    $( '#input_03' ).datepicker()
+
+</script>
+
+
+
+
+
+
+
+
+

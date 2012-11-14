@@ -2,7 +2,7 @@
 
 .datepicker--holder {
     height: 0;
-    position: relative;
+    position: absolute;
     z-index: 10000;
 }
 
@@ -18,7 +18,8 @@
     border: 1px solid #ccc;
     background: #fff;
     font-size: 18px;
-    width: 280px;
+    max-width: 320px;
+    min-width: 240px;
 
     -webkit-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
        -moz-box-shadow: 0 6px 18px 1px rgba(0,0,0,.12);
@@ -27,6 +28,10 @@
     -webkit-border-radius: 6px;
        -moz-border-radius: 6px;
             border-radius: 6px;
+
+    -webkit-box-sizing: border-box;
+       -moz-box-sizing: border-box;
+            box-sizing: border-box;
 }
 
 
@@ -41,7 +46,7 @@
 }
 
 .datepicker--calendar__date {
-    padding: .25em 0;
+    padding: .33em 0 .25em;
     font-weight: 100;
 
     -webkit-border-radius: 5px;
@@ -68,11 +73,21 @@
 }
 
 
+.datepicker--month__nav {
+    position: relative;
+}
+
+.datepicker--month__prev,
+.datepicker--month__next {
+    position: absolute;
+    top: 0;
+}
+
 .datepicker--month__prev {
-    float: left;
+    left: 0;
 }
 .datepicker--month__next {
-    float: right;
+    right: 0;
 }
 
 .datepicker--month,
@@ -99,8 +114,9 @@
     color: #0089ec;
 }
 
-.datepicker--day__selected {
-    background: #0089ec !important;
+.datepicker--day__selected,
+.datepicker--day__selected:hover {
+    background: #0089ec;
     color: #fff;
 }
 
