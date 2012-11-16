@@ -1,23 +1,20 @@
 /*!
-    datepicker.js v0.9.8
-    By Amsul (http://amsul.ca)
+ *  datepicker.js v0.9.8 - 15 November, 2012
+ *  By Amsul (http://amsul.ca)
+ *  Hosted on https://github.com/amsul/pickadate.js
+ */
 
-    Updated: 15 November, 2012
-
-    (c) Amsul Naeem, 2012 - http://amsul.ca
-    Licensed under MIT ("expat" flavour) license.
-    Hosted on http://github.com/amsul/pickadate.js
-
-    TODO: month & year dropdown selectors
-    TODO: add methods onSelectDate, onMonthChange, onOpenCalendar, onCloseCalendar
-*/
+/**
+ *  TODO: month & year dropdown selectors
+ *  TODO: add methods onSelectDate, onMonthChange, onOpenCalendar, onCloseCalendar
+ */
 
 /*jshint
     debug: true,
     devel: true,
     browser: true,
     asi: true
-*/
+ */
 
 
 
