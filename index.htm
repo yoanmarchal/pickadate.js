@@ -17,8 +17,7 @@
         <input id="input_01" class="datepicker" type="text">
     </fieldset>
 
-    <h3>Bind it like this:</h3>
-    <pre><code>$( '.datepicker' ).datepicker()</code></pre>
+    <p>Bind it like this: <code>$( '.datepicker' ).datepicker()</code></p>
 
 </section>
 
@@ -35,42 +34,42 @@
 
     <fieldset>
         <h3><label for="input_02">Here's one with the date already filled in:</label></h3>
-        <input id="input_02" class="datepicker" type="text" value="14 August 2012">
+        <input id="input_02" class="datepicker" type="text" value="14 August, 2012">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_03">Use the scary&#42; <code>type="date"</code>:</label></h3>
-        <input id="input_03" type="date" value="31 October 2012">
+        <input id="input_03" type="date" value="31 October, 2012">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_04">Or, the friendly&#42;&#42; <code>type="text"</code>:</label></h3>
-        <input id="input_04" class="datepicker" type="text" value="25 December 2012">
+        <input id="input_04" class="datepicker" type="text" value="25 December, 2012">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_05">Did I mention it's excitingly lightweight?</label></h3>
-        <input id="input_05" class="datepicker" type="text" value="1 January 2013">
+        <input id="input_05" class="datepicker" type="text" value="1 January, 2013">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_06">You're in love with it now, aren't you?</label></h3>
-        <input id="input_06" class="datepicker" type="text" value="14 February 2013">
+        <input id="input_06" class="datepicker" type="text" value="14 February, 2013">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_07">I'm actually pretty unique.</label></h3>
-        <input id="input_07" class="datepicker" type="text" value="29 February 2016">
+        <input id="input_07" class="datepicker" type="text" value="29 February, 2016">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_08">Others will fool you into believing they're cool.</label></h3>
-        <input id="input_08" class="datepicker" type="text" value="1 April 2013">
+        <input id="input_08" class="datepicker" type="text" value="1 April, 2013">
     </fieldset>
 
     <fieldset>
         <h3><label for="input_09">But honestly, who's the coolest around the house?</label></h3>
-        <input id="input_09" class="datepicker" type="text" value="12 May 2013">
+        <input id="input_09" class="datepicker" type="text" value="12 May, 2013">
     </fieldset>
 
 </section>
@@ -102,13 +101,39 @@
 <script src="pickadate.js"></script>
 
 <script type="text/javascript">
-    $( '[type=date], .datepicker' )/*.first()*/.datepicker({
-        // date_min: false
-        // date_min: [ 2012, 10, 30 ],
-        // date_max: [ 2012, 12, 21 ]
-        // date_max: 5
-        // date_max: true
+    $( '#input_02' ).datepicker({
+        date_min: false,
+        date_max: [ 2012, 12, 14 ]
     })
+    $( '#input_03' ).datepicker({
+        date_min: [ 2012, 10, 25 ],
+        date_max: 5
+    })
+    $( '#input_04' ).datepicker({
+        date_min: [ 2012, 12, 25 ],
+        date_max: [ 2012, 12, 25 ]
+    })
+    $( '#input_05' ).datepicker({
+        date_min: false,
+        date_max: [ 2013, 1, 20 ]
+    })
+    $( '#input_06' ).datepicker({
+        date_min: [ 2012, 12, 25 ],
+        date_max: [ 2013, 2, 14 ]
+    })
+    $( '#input_07' ).datepicker({
+        date_min: [ 2016, 2, 1 ],
+        date_max: [ 2016, 3, 31 ]
+    })
+    $( '#input_08' ).datepicker({
+        date_min: [ 2013, 2, 1 ],
+        date_max: [ 2013, 5, 20 ]
+    })
+    $( '#input_09' ).datepicker({
+        date_min: false
+    })
+
+    $( '[type=date], .datepicker' ).datepicker()
 </script>
 
 

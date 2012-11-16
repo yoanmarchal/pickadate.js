@@ -1,15 +1,15 @@
 /*!
-    datepicker.js v0.9.2
+    datepicker.js v0.9.8
     By Amsul (http://amsul.ca)
 
-    Updated: 14 November, 2012
+    Updated: 15 November, 2012
 
     (c) Amsul Naeem, 2012 - http://amsul.ca
     Licensed under MIT ("expat" flavour) license.
     Hosted on http://github.com/amsul/pickadate.js
 
-    TODO: Date.parse & various date formats
     TODO: month & year dropdown selectors
+    TODO: add methods onSelectDate, onMonthChange, onOpenCalendar, onCloseCalendar
 */
 
 /*jshint
@@ -73,6 +73,21 @@
 
 
             var
+                // Today
+                DATE_TODAY,
+
+                // The date selected
+                DATE_SELECTED,
+
+                // The minimum selectable date
+                DATE_MIN,
+
+                // The maximum selectable date
+                DATE_MAX,
+
+                // The month in focus on the calendar
+                MONTH_FOCUSED,
+
                 // The Picker prototype
                 P,
 
@@ -143,31 +158,6 @@
                     var
 
                         /**
-                         *  Get the nav for next and previous
-                         *  month as a string
-                         */
-                        createMonthNav = function() {
-
-                            var
-                                createMonthTag = function( tagName ) {
-
-                                    // If the tag is 'prev', and month focused is
-                                    // less or equal to the minimum date month,
-                                    // or if tag is 'next' month focused is
-                                    // greater or equal to the maximum date month,
-                                    // return an empty string
-                                    if ( P.DATE_MIN && ( tagName === 'prev' && P.MONTH_FOCUSED.MONTH <= P.DATE_MIN.MONTH && P.MONTH_FOCUSED.YEAR <= P.DATE_MIN.YEAR ) || P.DATE_MAX && ( tagName === 'next' && P.MONTH_FOCUSED.MONTH >= P.DATE_MAX.MONTH && P.MONTH_FOCUSED.YEAR >= P.DATE_MAX.YEAR ) ) {
-                                        return ''
-                                    }
-
-                                    // Otherwise, return the created tag
-                                    return create( 'div', P.settings[ 'month_' + tagName ], P.settings[ 'class_month_' + tagName ], { name: 'nav', value: tagName } )
-                                }
-
-                            return createMonthTag( 'prev' ) + createMonthTag( 'next' )
-                        }, //createMonthNav
-
-                        /**
                          *  Create the calendar table head
                          *  that contains all the weekday labels
                          */
@@ -176,14 +166,15 @@
                             var
                                 wrappedTableHead = function( weekday ) {
                                     return create( 'th', weekday, P.settings.class_weekdays )
-                                }
+                                },
+                                weekdaysCollection = ( P.settings.show_weekdays_short ) ? P.settings.weekdays_short : P.settings.weekdays_full
 
                             // Go through each day of the week
                             // and return a wrapped the header
                             // and then do a join.
                             // Take the result and apply another
                             // wrapper to group the cells
-                            return create( 'thead', P.settings.days_short.map( wrappedTableHead ) )
+                            return create( 'thead', weekdaysCollection.map( wrappedTableHead ) )
                         })(),
 
 
@@ -295,7 +286,8 @@
                                                 loopDate.YEAR,
                                                 loopDate.MONTH + 1,  // We do +1 just to give an appropriate display
                                                 loopDate.DATE,
-                                                loopDate.DAY
+                                                loopDate.DAY,
+                                                loopDate.TIME
                                             ].join( '/' )
                                         }
                                     ]
@@ -346,8 +338,10 @@
                                 classAndBinding = setDateClassAndBinding( loopDate )
 
 
-                                // Pass the item to the calendar array
-                                calendarDates.push( create( 'td', loopDate.DATE, classAndBinding[ 0 ], classAndBinding[ 1 ] ) )
+                                // Create the looped date wrapper,
+                                // and then create the table cell wrapper
+                                // and finally pass it to the calendar array
+                                calendarDates.push( create( 'td', create( 'div', loopDate.DATE, classAndBinding[ 0 ], classAndBinding[ 1 ] ) ) )
 
 
                                 // Check if it's the end of a week.
@@ -365,6 +359,38 @@
                             // Join the dates and wrap the calendar body
                             return create( 'tbody', calendarWeeks, P.settings.class_calendar_body )
                         }, //createTableBody
+
+
+                        /**
+                         *  Get the nav for next and previous
+                         *  month as a string
+                         */
+                        createMonthNav = function() {
+
+                            var
+                                // Get the minimum date
+                                dateMinimum = P.getDateMin(),
+
+                                // Get the maximum date
+                                dateMaximum = P.getDateMax(),
+
+                                createMonthTag = function( tagName ) {
+
+                                    // If the tag is 'prev', and month focused is
+                                    // less or equal to the minimum date month,
+                                    // or if tag is 'next' month focused is
+                                    // greater or equal to the maximum date month,
+                                    // return an empty string
+                                    if ( dateMinimum && ( tagName === 'prev' && MONTH_FOCUSED.MONTH <= dateMinimum.MONTH && MONTH_FOCUSED.YEAR <= dateMinimum.YEAR ) || dateMaximum && ( tagName === 'next' && MONTH_FOCUSED.MONTH >= dateMaximum.MONTH && MONTH_FOCUSED.YEAR >= dateMaximum.YEAR ) ) {
+                                        return ''
+                                    }
+
+                                    // Otherwise, return the created tag
+                                    return create( 'div', P.settings[ 'month_' + tagName ], P.settings[ 'class_month_' + tagName ], { name: 'nav', value: tagName } )
+                                }
+
+                            return createMonthTag( 'prev' ) + createMonthTag( 'next' )
+                        }, //createMonthNav
 
 
                         /**
@@ -590,10 +616,10 @@
                                 $daySelected = P.findSelectedDay(),
 
                                 // Get the selected date
-                                dateSelected = P.DATE_SELECTED,
+                                dateSelected = P.getDateSelected(),
 
                                 // Get the focused month
-                                monthFocused = P.MONTH_FOCUSED,
+                                monthFocused = P.getMonthFocused(),
 
                                 // Create the targetted date array
                                 // from the clicked date
@@ -610,22 +636,22 @@
                                             YEAR: +dateTargetedArray[ 0 ],
                                             MONTH: +dateTargetedArray[ 1 ] - 1,  // We minus 1 to get the month at 0index
                                             DATE: +dateTargetedArray[ 2 ],
-                                            DAY: +dateTargetedArray[ 3 ]
+                                            DAY: +dateTargetedArray[ 3 ],
+                                            TIME: +dateTargetedArray[ 4 ]
                                         }
                                     }
-
                                 })()
 
 
                             // Check if there has been no change in date
                             // just return it
-                            if ( dateTargeted && dateTargeted.YEAR === dateSelected.YEAR && dateTargeted.MONTH === dateSelected.MONTH && dateTargeted.DATE === dateSelected.DATE ) {
+                            if ( dateTargeted && dateTargeted.TIME === dateSelected.TIME ) {
                                 return P
                             }
 
 
                             // Set the target as the newly selected date
-                            P.DATE_SELECTED = dateTargeted || P.DATE_SELECTED
+                            DATE_SELECTED = dateTargeted || DATE_SELECTED
 
 
                             // If it's the same month
@@ -642,7 +668,7 @@
                             else {
 
                                 // Set the target as the newly focused month
-                                P.MONTH_FOCUSED = dateTargeted || P.MONTH_FOCUSED
+                                MONTH_FOCUSED = dateTargeted || MONTH_FOCUSED
 
                                 // Render a new calendar
                                 P.calendar.render()
@@ -653,7 +679,7 @@
                             if ( $dayTargeted ) {
 
                                 // Set the element value
-                                P.$element[ 0 ].value = P.DATE_SELECTED.DATE + ' ' + P.getSelectedMonth() + ' ' + P.DATE_SELECTED.YEAR
+                                P.$element[ 0 ].value = DATE_SELECTED.DATE + ' ' + P.getSelectedMonth() + ', ' + DATE_SELECTED.YEAR
 
                                 // Close the calendar
                                 calendarObject.close()
@@ -675,7 +701,7 @@
                                 monthAddOrSubtract = ( direction === 'prev' ) ? -1 : 1
 
                             // Set the month to show in focus
-                            P.setMonthFocused([ P.MONTH_FOCUSED.YEAR, P.MONTH_FOCUSED.MONTH + monthAddOrSubtract, P.MONTH_FOCUSED.DATE ])
+                            P.setMonthFocused([ MONTH_FOCUSED.YEAR, MONTH_FOCUSED.MONTH + monthAddOrSubtract, MONTH_FOCUSED.DATE ])
 
                             // Set the selected day
                             P.calendar.setCalendarDate()
@@ -691,7 +717,7 @@
                  */
                 getDateToday: function() {
 
-                    return P.DATE_TODAY || (function() {
+                    return DATE_TODAY || (DATE_TODAY = (function() {
 
                         // Create a new date for today
                         var dateToday = new Date()
@@ -700,14 +726,14 @@
                         dateToday.setHours( 0, 0, 0, 0 )
 
                         // Create and return the calendar date object
-                        return P.DATE_TODAY = {
+                        return {
                             YEAR: dateToday.getFullYear(),
                             MONTH: dateToday.getMonth(),
                             DATE: dateToday.getDate(),
                             DAY: dateToday.getDay(),
                             TIME: dateToday.getTime()
                         }
-                    })()
+                    })())
                 }, //getDateToday
 
 
@@ -717,7 +743,7 @@
                  */
                 getDateMin: function() {
 
-                    return P.DATE_MIN || (function( settingsDate ) {
+                    return DATE_MIN || (DATE_MIN = (function( settingsDate ) {
 
                         var dateMinimum
 
@@ -728,7 +754,7 @@
                         // If the date is not an array,
                         // set the minimum date to today
                         if ( !isArray( settingsDate ) ) {
-                            return dateMinimum = P.getDateToday()
+                            return P.getDateToday()
                         }
 
 
@@ -736,14 +762,14 @@
                         dateMinimum = new Date( settingsDate[ 0 ], settingsDate[ 1 ] - 1, settingsDate[ 2 ] )
 
                         // Create and return the calendar date object
-                        return P.DATE_MIN = {
+                        return {
                             YEAR: dateMinimum.getFullYear(),
                             MONTH: dateMinimum.getMonth(),
                             DATE: dateMinimum.getDate(),
                             DAY: dateMinimum.getDay(),
                             TIME: dateMinimum.getTime()
                         }
-                    })( P.settings.date_min )
+                    })( P.settings.date_min ))
                 }, //getDateMin
 
 
@@ -753,7 +779,7 @@
                  */
                 getDateMax: function() {
 
-                    return P.DATE_MAX || (function( settingsDate, dateToday ) {
+                    return DATE_MAX || (DATE_MAX = (function( settingsDate, dateToday ) {
 
                         var dateMaximum
 
@@ -779,14 +805,14 @@
                         else { return false }
 
                         // Create and return the calendar date object
-                        return P.DATE_MAX = {
+                        return {
                             YEAR: dateMaximum.getFullYear(),
                             MONTH: dateMaximum.getMonth(),
                             DATE: dateMaximum.getDate(),
                             DAY: dateMaximum.getDay(),
                             TIME: dateMaximum.getTime()
                         }
-                    })( P.settings.date_max, P.getDateToday() )
+                    })( P.settings.date_max, P.getDateToday() ))
                 }, //getDateMax
 
 
@@ -799,7 +825,7 @@
 
                     // If there's a date set to focus, return it
                     // otherwise focus on today
-                    return P.MONTH_FOCUSED || ( P.MONTH_FOCUSED = P.getDateSelected() )
+                    return MONTH_FOCUSED || ( MONTH_FOCUSED = P.getDateSelected() )
                 }, //getMonthFocused
 
                 /**
@@ -837,12 +863,12 @@
                         day = new Date( year, month, date ).getDay()
 
                     // Set and return the month focused
-                    return P.MONTH_FOCUSED = {
+                    return (MONTH_FOCUSED = {
                         YEAR: year,
                         MONTH: month,
                         DATE: date,
                         DAY: day
-                    }
+                    })
                 }, //setMonthFocused
 
 
@@ -855,30 +881,32 @@
 
                     // If there's a date selected, return it
                     // otherwise figure out the date
-                    return P.DATE_SELECTED || (function() {
+                    return DATE_SELECTED || (DATE_SELECTED = (function() {
 
                         var
-                            // Create a new date from the input element
-                            dateSelected = new Date( P.$element[ 0 ].value )
+                            // Try to parse the value from the input element
+                            dateSelected = Date.parse( P.$element[ 0 ].value )
 
 
-                        // If there's no date in the input
-                        if ( dateSelected.toString() === 'Invalid Date' || isNaN( dateSelected ) ) {
+                        // If there's no valid date in the input
+                        if ( isNaN( dateSelected ) ) {
 
                             // Get and return today's date
-                            return P.DATE_SELECTED = P.getDateToday()
+                            return P.getDateToday()
                         }
 
+                        // Otherwise, create a new date
+                        dateSelected = new Date( dateSelected )
 
                         // Otherwise create and return the calendar date object
-                        return P.DATE_SELECTED = {
+                        return {
                             YEAR: dateSelected.getFullYear(),
                             MONTH: dateSelected.getMonth(),
                             DATE: dateSelected.getDate(),
                             DAY: dateSelected.getDay(),
                             TIME: dateSelected.getTime()
                         }
-                    })()
+                    })())
                 }, //getDateSelected
 
 
@@ -955,7 +983,8 @@
                  *  Get the focused month
                  */
                 getFocusedMonth: function() {
-                    return P.settings.months_full[ P.MONTH_FOCUSED.MONTH ]
+                    var monthsCollection = ( P.settings.show_months_full ) ? P.settings.months_full : P.settings.months_short
+                    return monthsCollection[ MONTH_FOCUSED.MONTH ]
                 }, //getFocusedMonth
 
 
@@ -963,7 +992,7 @@
                  *  Get the focused year
                  */
                 getFocusedYear: function() {
-                    return P.MONTH_FOCUSED.YEAR
+                    return MONTH_FOCUSED.YEAR
                 }, //getFocusedYear
 
 
@@ -971,7 +1000,7 @@
                  *  Get the selected date
                  */
                 getSelectedDate: function() {
-                    return P.DATE_SELECTED.DATE
+                    return DATE_SELECTED.DATE
                 }, //getSelectedDate
 
 
@@ -979,7 +1008,8 @@
                  *  Get the selected month as a string
                  */
                 getSelectedMonth: function() {
-                    return P.settings.months_full[ P.DATE_SELECTED.MONTH ]
+                    var monthsCollection = ( P.settings.show_months_full ) ? P.settings.months_full : P.settings.months_short
+                    return monthsCollection[ DATE_SELECTED.MONTH ]
                 }, //getSelectedMonth
 
 
@@ -987,7 +1017,7 @@
                  *  Get the selected month as a string
                  */
                 getSelectedYear: function() {
-                    return P.DATE_SELECTED.YEAR
+                    return DATE_SELECTED.YEAR
                 }, //getSelectedYear
 
 
@@ -1061,8 +1091,9 @@
 
         months_full: [ 'January', 'February', 'March', 'April', 'May', 'June', 'July', 'August', 'September', 'October', 'November', 'December' ],
         months_short: [ 'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec' ],
-        days_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
-        days_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
+
+        weekdays_full: [ 'Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday' ],
+        weekdays_short: [ 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat' ],
 
         month_prev: '&#9664;',
         month_next: '&#9654;',
@@ -1071,9 +1102,9 @@
         date_min: true,
         date_max: false,
 
-        // Calendar widths
-        // width_min: 256,
-        // width_max: 320 or none??,
+        // Display strings
+        show_months_full: true,
+        show_weekdays_short: true,
 
         class_picker_open: 'datepicker--opened',
         class_picker_holder: 'datepicker--holder',
